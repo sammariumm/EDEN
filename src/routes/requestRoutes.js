@@ -185,4 +185,31 @@ router.post(
   }
 );
 
+// GET approved requests for store tab
+router.get("/approved", (req, res) => {
+  try {
+    const { subcategory } = req.query;
+
+    let items;
+
+    if (subcategory) {
+      // Validate subcategory to avoid SQL injection or invalid values
+      const validSubs = ['tools', 'decoration', 'plants', 'flowers', 'miscellaneous'];
+      if (!validSubs.includes(subcategory)) {
+        return res.status(400).json({ message: "Invalid subcategory" });
+      }
+      items = db.prepare(
+        "SELECT * FROM requests WHERE status = 'approved' AND subcategory = ?"
+      ).all(subcategory);
+    } else {
+      items = db.prepare("SELECT * FROM requests WHERE status = 'approved'").all();
+    }
+
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch approved items" });
+  }
+});
+
+
 export default router;

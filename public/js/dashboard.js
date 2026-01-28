@@ -2,7 +2,7 @@
 // CONFIG
 // ==========================
 const API_HEADERS = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 // ==========================
@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // DASHBOARD LOADER
 // ==========================
 async function loadDashboard() {
-  // Note updated fetch URL: /users/me
   const res = await fetch("/users/me", { headers: API_HEADERS() });
 
   if (!res.ok) {
@@ -74,7 +73,7 @@ async function loadUserRequests() {
   const list = document.getElementById("userRequests");
   list.innerHTML = "";
 
-  requests.forEach(r => {
+  requests.forEach((r) => {
     const li = document.createElement("li");
 
     let text = "";
@@ -86,9 +85,9 @@ async function loadUserRequests() {
 
     li.innerHTML = `<strong>${text}</strong>`;
 
-    if (r.image_path) {
+    if (r.image) {
       const img = document.createElement("img");
-      img.src = r.image_path;
+      img.src = r.image;
       img.style.maxWidth = "150px";
       img.style.display = "block";
       img.style.marginTop = "5px";
@@ -113,15 +112,16 @@ async function loadAdminRequests() {
   const tbody = document.getElementById("adminRequests");
   tbody.innerHTML = "";
 
-  rows.forEach(r => {
+  rows.forEach((r) => {
     const tr = document.createElement("tr");
 
-    let details = r.type === "job_listing"
-      ? `$${r.hourly_rate}/hr`
-      : `$${r.price} (${r.subcategory})`;
+    let details =
+      r.type === "job_listing"
+        ? `$${r.hourly_rate}/hr`
+        : `$${r.price} (${r.subcategory})`;
 
-    let imageHtml = r.image_path
-      ? `<img src="${r.image_path}" style="max-width:80px; display:block; margin-top:5px;">`
+    let imageHtml = r.image
+      ? `<img src="${r.image}" style="max-width:80px; display:block; margin-top:5px;">`
       : "—";
 
     tr.innerHTML = `
@@ -148,7 +148,7 @@ async function loadAdminRequests() {
 async function approveRequest(id) {
   await fetch(`/requests/${id}/approve`, {
     method: "POST",
-    headers: API_HEADERS()
+    headers: API_HEADERS(),
   });
   loadAdminRequests();
 }
@@ -156,7 +156,7 @@ async function approveRequest(id) {
 async function rejectRequest(id) {
   await fetch(`/requests/${id}/reject`, {
     method: "POST",
-    headers: API_HEADERS()
+    headers: API_HEADERS(),
   });
   loadAdminRequests();
 }
@@ -179,8 +179,9 @@ async function submitJobRequest(e) {
 
   await fetch("/requests/create", {
     method: "POST",
+    // Do NOT set Content-Type header here, browser will set multipart/form-data automatically
     headers: API_HEADERS(),
-    body: formData
+    body: formData,
   });
 
   e.target.reset();
@@ -204,7 +205,7 @@ async function submitStoreRequest(e) {
   await fetch("/requests/create", {
     method: "POST",
     headers: API_HEADERS(),
-    body: formData
+    body: formData,
   });
 
   e.target.reset();
