@@ -2,42 +2,51 @@
 // CONFIG
 // ==========================
 const API_HEADERS = () => ({
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("token")}`
+  Authorization: `Bearer ${localStorage.getItem("token")}`
 });
 
 // ==========================
-// LOAD DASHBOARD FUNCTION
+// ENTRY POINT
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  document
+    .getElementById("jobRequestForm")
+    .addEventListener("submit", submitJobRequest);
+
+  document
+    .getElementById("storeRequestForm")
+    .addEventListener("submit", submitStoreRequest);
+
+  loadDashboard();
+});
+
+// ==========================
+// DASHBOARD LOADER
 // ==========================
 async function loadDashboard() {
-  try {
-    const res = await fetch("/me", {
-      headers: API_HEADERS()
-    });
+  const res = await fetch("/me", { headers: API_HEADERS() });
 
-    if (!res.ok) {
-      logout();
-      return;
-    }
-
-    const user = await res.json();
-    console.log("Logged-in user data:", user); // Debugging
-
-    document.getElementById("welcome").textContent = `Welcome, ${user.username}`;
-
-    if (user.isAdmin) {
-      showAdminDashboard();
-    } else {
-      showUserDashboard();
-    }
-  } catch (err) {
-    console.error("Dashboard load failed:", err);
+  if (!res.ok) {
     logout();
+    return;
+  }
+
+  const user = await res.json();
+
+  document.getElementById("welcome").textContent =
+    `Welcome, ${user.username}`;
+
+  if (user.isAdmin) {
+    showAdminDashboard();
+  } else {
+    showUserDashboard();
   }
 }
 
 // ==========================
-// DASHBOARD DISPLAY HELPERS
+// DASHBOARD VISIBILITY
 // ==========================
 function showUserDashboard() {
   document.getElementById("userDashboard").style.display = "block";
@@ -52,70 +61,69 @@ function showAdminDashboard() {
 }
 
 // ==========================
-// USER REQUESTS
+// USER REQUEST LIST
 // ==========================
 async function loadUserRequests() {
-  const res = await fetch("/requests/my", {
-    headers: API_HEADERS()
-  });
-
+  const res = await fetch("/requests/my", { headers: API_HEADERS() });
   const requests = await res.json();
-  const list = document.getElementById("userRequests");
 
+  const list = document.getElementById("userRequests");
   list.innerHTML = "";
 
-  requests.forEach((r) => {
+  requests.forEach(r => {
     const li = document.createElement("li");
 
+    let text = "";
     if (r.type === "job_listing") {
-      li.textContent = `${r.title} (Job) — ${r.status}, $${r.hourly_rate}/hr`;
-    } else if (r.type === "store") {
-      li.textContent = `${r.title} (Store - ${r.subcategory || "N/A"}) — ${r.status}, $${r.price}`;
+      text = `${r.title} — $${r.hourly_rate}/hr (${r.status})`;
     } else {
-      li.textContent = `${r.type} — ${r.status}`;
+      text = `${r.title} [${r.subcategory}] — $${r.price} (${r.status})`;
+    }
+
+    li.innerHTML = `<strong>${text}</strong>`;
+
+    if (r.image_path) {
+      const img = document.createElement("img");
+      img.src = r.image_path;
+      img.style.maxWidth = "150px";
+      img.style.display = "block";
+      img.style.marginTop = "5px";
+      li.appendChild(img);
     }
 
     list.appendChild(li);
   });
 }
 
-async function createRequest(type, details) {
-  await fetch("/requests/create", {
-    method: "POST",
-    headers: API_HEADERS(),
-    body: JSON.stringify({ type, ...details }),
-  });
-
-  loadUserRequests();
-}
-
 // ==========================
-// ADMIN REQUESTS
+// ADMIN REQUEST LIST
 // ==========================
 async function loadAdminRequests() {
-  const res = await fetch("/requests/pending", {
-    headers: API_HEADERS()
-  });
-
+  const res = await fetch("/requests/pending", { headers: API_HEADERS() });
   const rows = await res.json();
-  const tbody = document.getElementById("adminRequests");
 
+  const tbody = document.getElementById("adminRequests");
   tbody.innerHTML = "";
 
-  rows.forEach((r) => {
+  rows.forEach(r => {
     const tr = document.createElement("tr");
 
-    let details = "";
-    if (r.type === "job_listing") {
-      details = `${r.title} — $${r.hourly_rate}/hr`;
-    } else if (r.type === "store") {
-      details = `${r.title} (Category: ${r.subcategory || "N/A"}) — $${r.price}`;
-    }
+    let details = r.type === "job_listing"
+      ? `$${r.hourly_rate}/hr`
+      : `$${r.price} (${r.subcategory})`;
+
+    let imageHtml = r.image_path
+      ? `<img src="${r.image_path}" style="max-width:80px; display:block; margin-top:5px;">`
+      : "—";
 
     tr.innerHTML = `
       <td>${r.username}</td>
       <td>${r.type}</td>
-      <td>${details}</td>
+      <td>
+        <strong>${r.title}</strong><br>
+        ${details}<br>
+        ${imageHtml}
+      </td>
       <td>
         <button onclick="approveRequest(${r.id})">Approve</button>
         <button onclick="rejectRequest(${r.id})">Reject</button>
@@ -126,12 +134,14 @@ async function loadAdminRequests() {
   });
 }
 
+// ==========================
+// ADMIN ACTIONS
+// ==========================
 async function approveRequest(id) {
   await fetch(`/requests/${id}/approve`, {
     method: "POST",
     headers: API_HEADERS()
   });
-
   loadAdminRequests();
 }
 
@@ -140,44 +150,69 @@ async function rejectRequest(id) {
     method: "POST",
     headers: API_HEADERS()
   });
-
   loadAdminRequests();
 }
 
 // ==========================
-// EVENT LISTENERS & INIT
+// FORM SUBMISSIONS
 // ==========================
-document.addEventListener("DOMContentLoaded", () => {
-  loadDashboard();
+async function submitJobRequest(e) {
+  e.preventDefault();
 
-  document.getElementById("jobRequestForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const title = document.getElementById("jobTitle").value.trim();
-    const description = document.getElementById("jobDescription").value.trim();
-    const hourly_rate = parseFloat(document.getElementById("hourlyRate").value);
+  const formData = new FormData();
+  formData.append("type", "job_listing");
+  formData.append("title", jobTitle.value);
+  formData.append("description", jobDescription.value);
+  formData.append("hourly_rate", hourlyRate.value);
 
-    await createRequest("job_listing", { title, description, hourly_rate });
+  if (jobImage?.files[0]) {
+    formData.append("image", jobImage.files[0]);
+  }
+
+  await fetch("/requests/create", {
+    method: "POST",
+    headers: API_HEADERS(),
+    body: formData
   });
 
-  document.getElementById("storeRequestForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const title = document.getElementById("storeTitle").value.trim();
-    const description = document.getElementById("storeDescription").value.trim();
-    const price = parseFloat(document.getElementById("price").value);
-    const subcategory = document.getElementById("storeSubcategory") ? document.getElementById("storeSubcategory").value : null;
+  e.target.reset();
+  loadUserRequests();
+}
 
-    await createRequest("store", { title, description, price, subcategory });
+async function submitStoreRequest(e) {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("type", "store");
+  formData.append("title", storeTitle.value);
+  formData.append("description", storeDescription.value);
+  formData.append("price", price.value);
+  formData.append("subcategory", storeSubcategory.value);
+
+  if (storeImage?.files[0]) {
+    formData.append("image", storeImage.files[0]);
+  }
+
+  await fetch("/requests/create", {
+    method: "POST",
+    headers: API_HEADERS(),
+    body: formData
   });
-});
+
+  e.target.reset();
+  loadUserRequests();
+}
 
 // ==========================
-// AUTH UTILITIES
+// LOGOUT
 // ==========================
 function logout() {
   localStorage.removeItem("token");
   window.location.href = "/login.html";
 }
 
-window.logout = logout;
+// ==========================
+// GLOBALS (for inline buttons)
+// ==========================
 window.approveRequest = approveRequest;
 window.rejectRequest = rejectRequest;
