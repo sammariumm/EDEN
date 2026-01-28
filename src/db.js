@@ -1,82 +1,24 @@
-import { DatabaseSync } from "node:sqlite";
-import bcrypt from "bcryptjs";
+import Database from 'better-sqlite3';
+import bcrypt from 'bcryptjs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const db = new DatabaseSync(":memory:");
+// Resolve __dirname since using ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// ================= USERS TABLE =================
-db.exec(`
-  CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT,
-    isAdmin INTEGER DEFAULT 0
-  )
-`);
+// Open persistent database file (adjust the path and filename if needed)
+const dbPath = path.join(__dirname, '../db/eden.db');
+const db = new Database(dbPath);
+console.log("DB Path:", dbPath);
+// Check if tables exist (optional: you can remove if you're confident)
+// This example just tries a simple query to see if 'users' exists
+try {
+  db.prepare('SELECT 1 FROM users LIMIT 1').get();
+} catch (e) {
+  console.error("Database not initialized or missing tables:", e.message);
+  process.exit(1);
+}
 
-// Admin user
-const adminPassword = bcrypt.hashSync("admin123", 10);
-db.prepare(`
-  INSERT INTO users (username, password, isAdmin)
-  VALUES (?, ?, ?)
-`).run("admin", adminPassword, 1);
-
-// Normal user
-const userPassword = bcrypt.hashSync("userpass", 10);
-const userInfo = db.prepare(`
-  INSERT INTO users (username, password, isAdmin)
-  VALUES (?, ?, ?)
-`).run("user1", userPassword, 0);
-
-const userId = userInfo.lastInsertRowid;
-
-// ================= REQUESTS TABLE =================
-db.exec(`
-  CREATE TABLE requests (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    type TEXT CHECK(type IN ('job_listing', 'store')) NOT NULL,
-    status TEXT CHECK(status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    hourly_rate REAL,
-    price REAL,
-    subcategory TEXT CHECK(subcategory IN ('tools','decoration','plants','flowers','miscellaneous')),
-    image_path TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-  )
-`);
-
-
-// ================= SEED REQUESTS =================
-const insertRequest = db.prepare(`
-  INSERT INTO requests
-  (user_id, type, status, title, description, hourly_rate, price, subcategory, image_path)
-  VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?)
-`);
-
-// Job listing (pending)
-insertRequest.run(
-  userId,
-  "job_listing",
-  "Part-time Web Developer",
-  "Looking for a frontend developer to work 15–20 hours per week.",
-  25.0,   // hourly_rate
-  null,   // price
-  null,   // subcategory
-  null    // image_path
-);
-
-// Store request (pending)
-insertRequest.run(
-  userId,
-  "store",
-  "Handcrafted Plant Pot",
-  "Eco-friendly ceramic pot suitable for indoor plants.",
-  null,          // hourly_rate
-  18.5,          // price
-  "plants",      // subcategory
-  null           // image_path
-);
-
+// Export the database connection for use in other modules
 export default db;

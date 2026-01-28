@@ -44,7 +44,7 @@ function validateRequestInput(type, body) {
 // ==========================
 // USER: VIEW OWN REQUESTS
 // ==========================
-router.get("/requests/my", authenticateToken, (req, res) => {
+router.get("/my", authenticateToken, (req, res) => {
   const rows = db.prepare(`
     SELECT
       id,
@@ -55,11 +55,10 @@ router.get("/requests/my", authenticateToken, (req, res) => {
       hourly_rate,
       price,
       subcategory,
-      image_path,
-      created_at
+      image
     FROM requests
     WHERE user_id = ?
-    ORDER BY created_at DESC
+    ORDER BY id DESC
   `).all(req.user.id);
 
   res.json(rows);
@@ -69,17 +68,14 @@ router.get("/requests/my", authenticateToken, (req, res) => {
 // USER: CREATE REQUEST (WITH OPTIONAL IMAGE)
 // ==========================
 router.post(
-  "/requests/create",
+  "/create",
   authenticateToken,
-  upload.single("image"), // <-- multer
+  upload.single("image"),
   (req, res) => {
     const { type, title, description, hourly_rate, price, subcategory } = req.body;
 
-    // Convert numbers (multer sends strings)
-    const parsedHourlyRate =
-      hourly_rate !== undefined ? Number(hourly_rate) : null;
-    const parsedPrice =
-      price !== undefined ? Number(price) : null;
+    const parsedHourlyRate = hourly_rate !== undefined ? Number(hourly_rate) : null;
+    const parsedPrice = price !== undefined ? Number(price) : null;
 
     const bodyForValidation = {
       type,
@@ -87,16 +83,14 @@ router.post(
       description,
       hourly_rate: parsedHourlyRate,
       price: parsedPrice,
-      subcategory
+      subcategory,
     };
 
     if (!validateRequestInput(type, bodyForValidation)) {
       return res.status(400).json({ message: "Invalid request data" });
     }
 
-    const imagePath = req.file
-      ? `/uploads/${req.file.filename}`
-      : null;
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
     db.prepare(`
       INSERT INTO requests (
@@ -108,7 +102,7 @@ router.post(
         hourly_rate,
         price,
         subcategory,
-        image_path
+        image
       )
       VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?)
     `).run(
@@ -130,7 +124,7 @@ router.post(
 // ADMIN: VIEW PENDING REQUESTS
 // ==========================
 router.get(
-  "/requests/pending",
+  "/pending",
   authenticateToken,
   requireAdmin,
   (req, res) => {
@@ -144,12 +138,11 @@ router.get(
         r.hourly_rate,
         r.price,
         r.subcategory,
-        r.image_path,
-        r.created_at
+        r.image
       FROM requests r
       JOIN users u ON r.user_id = u.id
       WHERE r.status = 'pending'
-      ORDER BY r.created_at DESC
+      ORDER BY r.id DESC
     `).all();
 
     res.json(rows);
@@ -160,7 +153,7 @@ router.get(
 // ADMIN: APPROVE REQUEST
 // ==========================
 router.post(
-  "/requests/:id/approve",
+  "/:id/approve",
   authenticateToken,
   requireAdmin,
   (req, res) => {
@@ -178,7 +171,7 @@ router.post(
 // ADMIN: REJECT REQUEST
 // ==========================
 router.post(
-  "/requests/:id/reject",
+  "/:id/reject",
   authenticateToken,
   requireAdmin,
   (req, res) => {

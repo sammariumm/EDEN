@@ -21,9 +21,9 @@ app.use(express.static(path.join(__dirname, "../public")));
 // Serve uploaded images
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-app.use(authRoutes);
-app.use(userRoutes);
-app.use(requestRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/requests', requestRoutes);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/login.html"));

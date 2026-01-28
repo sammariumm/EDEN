@@ -26,7 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // DASHBOARD LOADER
 // ==========================
 async function loadDashboard() {
-  const res = await fetch("/me", { headers: API_HEADERS() });
+  // Note updated fetch URL: /users/me
+  const res = await fetch("/users/me", { headers: API_HEADERS() });
 
   if (!res.ok) {
     logout();
@@ -35,8 +36,7 @@ async function loadDashboard() {
 
   const user = await res.json();
 
-  document.getElementById("welcome").textContent =
-    `Welcome, ${user.username}`;
+  document.getElementById("welcome").textContent = `Welcome, ${user.username}`;
 
   if (user.isAdmin) {
     showAdminDashboard();
@@ -65,6 +65,10 @@ function showAdminDashboard() {
 // ==========================
 async function loadUserRequests() {
   const res = await fetch("/requests/my", { headers: API_HEADERS() });
+  if (!res.ok) {
+    console.error("Failed to load user requests");
+    return;
+  }
   const requests = await res.json();
 
   const list = document.getElementById("userRequests");
@@ -100,6 +104,10 @@ async function loadUserRequests() {
 // ==========================
 async function loadAdminRequests() {
   const res = await fetch("/requests/pending", { headers: API_HEADERS() });
+  if (!res.ok) {
+    console.error("Failed to load admin requests");
+    return;
+  }
   const rows = await res.json();
 
   const tbody = document.getElementById("adminRequests");

@@ -31,7 +31,7 @@ loginForm.addEventListener("submit", async (e) => {
     const username = loginUsername.value;
     const password = loginPassword.value;
 
-    const res = await fetch("/login", {
+    const res = await fetch("/auth/login", {  // Updated endpoint with /auth prefix
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -55,7 +55,7 @@ registerForm.addEventListener("submit", async (e) => {
     const username = registerUsername.value;
     const password = registerPassword.value;
 
-    const res = await fetch("/register", {
+    const res = await fetch("/auth/register", {  // Updated endpoint with /auth prefix
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
