@@ -71,3 +71,7 @@ registerForm.addEventListener("submit", async (e) => {
     localStorage.setItem("token", data.token);
     window.location.href = "/dashboard.html";
 });
+
+document.getElementById("jobsBtn").addEventListener("click", () => {
+  window.location.href = "/job_listings.html";
+});

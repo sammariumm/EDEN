@@ -185,7 +185,9 @@ router.post(
   }
 );
 
-// GET approved requests for store tab
+// ==========================
+// GET approved requests for store tab (filterable by subcategory)
+// ==========================
 router.get("/approved", (req, res) => {
   try {
     const { subcategory } = req.query;
@@ -210,6 +212,50 @@ router.get("/approved", (req, res) => {
     res.status(500).json({ message: "Failed to fetch approved items" });
   }
 });
+
+// ==========================
+// GET approved job listings (public) with all needed fields
+// ==========================
+router.get("/jobs/approved", (req, res) => {
+  try {
+    console.log("HIT /jobs/approved");
+
+    const rows = db.prepare(`
+      SELECT r.id, r.title, r.description, r.hourly_rate, r.image, r.status, r.type, r.user_id, u.username
+      FROM requests r
+      JOIN users u ON r.user_id = u.id
+      WHERE LOWER(TRIM(r.type)) = 'job_listing'
+        AND LOWER(TRIM(r.status)) = 'approved'
+    `).all();
+
+
+    console.log("ROWS:", rows);
+
+    if (rows.length === 0) {
+      console.log("No job listings found");
+    }
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching approved job listings:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/jobs/approved/test2", (req, res) => {
+  const rows = db.prepare(`
+    SELECT id, title, type, status
+    FROM requests
+    WHERE LOWER(TRIM(type)) = 'job_listing'
+      AND LOWER(TRIM(status)) = 'approved'
+    ORDER BY id DESC
+    LIMIT 20
+  `).all();
+
+  console.log("ROWS test2:", rows);
+  res.json(rows);
+});
+
 
 
 export default router;

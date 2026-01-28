@@ -20,5 +20,9 @@ try {
   process.exit(1);
 }
 
+console.log(
+  db.prepare("SELECT COUNT(*) AS count FROM requests").get()
+);
+
 // Export the database connection for use in other modules
 export default db;
