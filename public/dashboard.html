@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <h1 id="welcome"></h1>
+
+    <!-- Logout button -->
+    <button id="logoutBtn">Logout</button>
+
+    <!-- USER DASHBOARD -->
+    <section id="userDashboard" style="display:none;">
+        <h2>User Dashboard</h2>
+
+        <button id="requestJob">Request Job Listing</button>
+        <button id="requestStore">Request Store Posting</button>
+
+        <h3>Your Requests</h3>
+        <ul id="userRequests"></ul>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section id="adminDashboard" style="display:none;">
+        <h2>Admin Dashboard</h2>
+
+        <h3>Pending Requests</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminRequests"></tbody>
+        </table>
+    </section>
+
+    <script src="js/dashboard.js"></script>
+
+    <script>
+        // Attach logout handler
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            logout();
+        });
+    </script>
+</body>
+</html>

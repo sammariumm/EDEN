@@ -1,0 +1,88 @@
+###
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "userpass"
+}
+
+### login check admin
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 
+
+GET http://localhost:3000/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2OTU5NDY3NywiZXhwIjoxNzY5NTk4Mjc3fQ.P-0I1hsLGUq4lFrqKdHRiFfDwE53ns07onDHT_xP0SQ
+
+###
+
+GET http://localhost:3000/requests/my
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2OTU5NDY3NywiZXhwIjoxNzY5NTk4Mjc3fQ.P-0I1hsLGUq4lFrqKdHRiFfDwE53ns07onDHT_xP0SQ
+
+###
+
+POST http://localhost:3000/requests/create
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "type": "job_listing"
+}
+
+
+### admin: view pending req
+
+GET http://localhost:3000/requests/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImlzQWRtaW4iOnRydWUsImlhdCI6MTc2OTU5NjAzNCwiZXhwIjoxNzY5NTk5NjM0fQ.0VzY17plaG4yLV6iOOkcf7VcCrd4X3NI-wsEtrcHRVU
+
+
+### admin: approve req
+
+POST http://localhost:3000/requests/1/approve
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2OTU5NDY3NywiZXhwIjoxNzY5NTk4Mjc3fQ.P-0I1hsLGUq4lFrqKdHRiFfDwE53ns07onDHT_xP0SQ
+
+### admin: reject req
+
+POST http://localhost:3000/requests/1/reject
+Authorization: Bearer YOUR_TOKEN_HERE
+
+
+### Register a new user
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+  "username": "newuser123",
+  "password": "mypassword"
+}
+
+### login with new user
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "username": "newuser123",
+  "password": "mypassword"
+}
+
+### check pending requests with new user
+GET http://localhost:3000/requests/my
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJuZXd1c2VyMTIzIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc2OTU5NTk1NywiZXhwIjoxNzY5NTk5NTU3fQ.Y3rhPUM5VBIobvv8yRD0ZYrEJZUeFrND3Px3ZNazKYo
+
+### create request with new user
+POST http://localhost:3000/requests/create
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJuZXd1c2VyMTIzIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc2OTU5NTk1NywiZXhwIjoxNzY5NTk5NTU3fQ.Y3rhPUM5VBIobvv8yRD0ZYrEJZUeFrND3Px3ZNazKYo
+Content-Type: application/json
+
+{
+  "type": "job_listing"
+}
