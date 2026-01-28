@@ -42,7 +42,7 @@ Content-Type: application/json
 ### admin: view pending req
 
 GET http://localhost:3000/requests/pending
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImlzQWRtaW4iOnRydWUsImlhdCI6MTc2OTU5NjAzNCwiZXhwIjoxNzY5NTk5NjM0fQ.0VzY17plaG4yLV6iOOkcf7VcCrd4X3NI-wsEtrcHRVU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImlzQWRtaW4iOnRydWUsImlhdCI6MTc2OTYwNjIyNSwiZXhwIjoxNzY5NjA5ODI1fQ.2nYY9uOr_3aT4LhKgvFL5TXMPXFoSXM0suUObMqsKBw
 
 
 ### admin: approve req

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="dashboard.css" />
 </head>
 <body>
 
@@ -16,8 +16,29 @@
     <section id="userDashboard" style="display:none;">
         <h2>User Dashboard</h2>
 
-        <button id="requestJob">Request Job Listing</button>
-        <button id="requestStore">Request Store Posting</button>
+        <h3>Request Job Listing</h3>
+        <form id="jobRequestForm">
+            <input type="text" id="jobTitle" placeholder="Title" required />
+            <textarea id="jobDescription" placeholder="Description" required></textarea>
+            <input type="number" id="hourlyRate" placeholder="Hourly Rate" step="0.01" required />
+            <button type="submit">Submit Job Request</button>
+        </form>
+
+        <h3>Request Store Posting</h3>
+        <form id="storeRequestForm">
+            <input type="text" id="storeTitle" placeholder="Title" required />
+            <textarea id="storeDescription" placeholder="Description" required></textarea>
+            <input type="number" id="price" placeholder="Price" step="0.01" required />
+            <select id="storeSubcategory" required>
+                <option value="" disabled selected>Select Category</option>
+                <option value="tools">Tools</option>
+                <option value="decoration">Decoration</option>
+                <option value="plants">Plants</option>
+                <option value="flowers">Flowers</option>
+                <option value="miscellaneous">Miscellaneous</option>
+            </select>
+            <button type="submit">Submit Store Request</button>
+        </form>
 
         <h3>Your Requests</h3>
         <ul id="userRequests"></ul>
@@ -33,6 +54,7 @@
                 <tr>
                     <th>User</th>
                     <th>Type</th>
+                    <th>Details</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -43,10 +65,12 @@
     <script src="js/dashboard.js"></script>
 
     <script>
-        // Attach logout handler
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            logout();
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                logout();
+            });
         });
     </script>
+
 </body>
 </html>
