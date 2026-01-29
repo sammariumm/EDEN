@@ -51,12 +51,14 @@ function showUserDashboard() {
   document.getElementById("userDashboard").style.display = "block";
   document.getElementById("adminDashboard").style.display = "none";
   loadUserRequests();
+  loadUserApplications(); // Load applications here for normal user
 }
 
 function showAdminDashboard() {
   document.getElementById("adminDashboard").style.display = "block";
   document.getElementById("userDashboard").style.display = "none";
   loadAdminRequests();
+  loadAdminApplications();  // Load admin’s own job applications here
 }
 
 // ==========================
@@ -99,6 +101,41 @@ async function loadUserRequests() {
 }
 
 // ==========================
+// USER APPLICATIONS LIST (Table version)
+// ==========================
+async function loadUserApplications() {
+  const res = await fetch("/user/applications", { headers: API_HEADERS() });
+  if (!res.ok) {
+    console.error("Failed to load user applications");
+    return;
+  }
+
+  const applications = await res.json();
+  const tbody = document.getElementById("userApplications");
+  tbody.innerHTML = "";
+
+  if (applications.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">No applications received yet.</td></tr>`;
+    return;
+  }
+
+  applications.forEach((app) => {
+    const submittedDate = new Date(app.submitted_at).toLocaleString();
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${app.job_title}</td>
+      <td>${app.applicant_name}</td>
+      <td>${app.applicant_email}</td>
+      <td>${submittedDate}</td>
+      <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+
+// ==========================
 // ADMIN REQUEST LIST
 // ==========================
 async function loadAdminRequests() {
@@ -138,6 +175,40 @@ async function loadAdminRequests() {
       </td>
     `;
 
+    tbody.appendChild(tr);
+  });
+}
+
+// ==========================
+// ADMIN APPLICATIONS LIST
+// ==========================
+async function loadAdminApplications() {
+  const res = await fetch("/admin/applications", { headers: API_HEADERS() });
+  if (!res.ok) {
+    console.error("Failed to load admin applications");
+    return;
+  }
+
+  const applications = await res.json();
+  const tbody = document.getElementById("adminApplications");
+  tbody.innerHTML = "";
+
+  if (applications.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">No applications found.</td></tr>`;
+    return;
+  }
+
+  applications.forEach((app) => {
+    const submittedDate = new Date(app.submitted_at).toLocaleString();
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${app.job_title}</td>
+      <td>${app.applicant_name}</td>
+      <td>${app.applicant_email}</td>
+      <td>${submittedDate}</td>
+      <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
+    `;
     tbody.appendChild(tr);
   });
 }

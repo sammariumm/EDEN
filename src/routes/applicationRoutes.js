@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import Database from "better-sqlite3";
+import { authenticateToken, requireAdmin } from "../middleware/authMiddleware.js";  // adjust path if needed
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const decodedDirname = decodeURIComponent(__dirname);
@@ -17,6 +18,36 @@ if (!fs.existsSync(dbDir)) {
 const dbPath = path.resolve(dbDir, "eden.db");
 const db = new Database(dbPath);
 const router = express.Router();
+
+// New route to get applications for logged-in user's job requests
+router.get("/user/applications", authenticateToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const query = `
+      SELECT 
+        applications.id,
+        applications.request_id,
+        applications.applicant_name,
+        applications.applicant_email,
+        applications.resume_path,
+        applications.submitted_at,
+        requests.title AS job_title
+      FROM applications
+      JOIN requests ON applications.request_id = requests.id
+      WHERE requests.user_id = ?
+      ORDER BY applications.submitted_at DESC;
+    `;
+
+    const applications = db.prepare(query).all(userId);
+
+    res.json(applications);
+  } catch (error) {
+    console.error("Error fetching user applications:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 // Multer storage config
 const storage = multer.diskStorage({
@@ -77,5 +108,66 @@ router.post("/applications/submit", upload.single("resume"), (req, res) => {
     res.status(500).send("Server error.");
   }
 });
+
+// show applications for user-uploaded job listing
+router.get("/user/applications", (req, res) => {
+  try {
+    // You need to get the logged-in user's id from the session/auth token
+    const userId = req.user.id;  // adjust based on your auth setup
+    
+    const query = `
+      SELECT 
+        applications.id,
+        applications.request_id,
+        applications.applicant_name,
+        applications.applicant_email,
+        applications.resume_path,
+        applications.submitted_at,
+        requests.title AS job_title
+      FROM applications
+      JOIN requests ON applications.request_id = requests.id
+      WHERE requests.user_id = ?
+      ORDER BY applications.submitted_at DESC;
+    `;
+
+    const applications = db.prepare(query).all(userId);
+
+    res.json(applications);
+
+  } catch (error) {
+    console.error("Error fetching user applications:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// for admin
+router.get("/admin/applications", authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const adminUserId = req.user.id;
+
+    const query = `
+      SELECT 
+        applications.id,
+        applications.request_id,
+        applications.applicant_name,
+        applications.applicant_email,
+        applications.resume_path,
+        applications.submitted_at,
+        requests.title AS job_title
+      FROM applications
+      JOIN requests ON applications.request_id = requests.id
+      WHERE requests.user_id = ?
+      ORDER BY applications.submitted_at DESC;
+    `;
+
+    const applications = db.prepare(query).all(adminUserId);
+
+    res.json(applications);
+  } catch (error) {
+    console.error("Error fetching admin applications:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 export default router;
