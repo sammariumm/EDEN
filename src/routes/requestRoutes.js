@@ -192,26 +192,35 @@ router.get("/approved", (req, res) => {
   try {
     const { subcategory } = req.query;
 
-    let items;
+    const validSubs = ['tools', 'decoration', 'plants', 'flowers', 'miscellaneous'];
+
+    let query = `
+      SELECT *
+      FROM requests
+      WHERE status = 'approved'
+        AND type = 'store'
+    `;
+
+    const params = [];
 
     if (subcategory) {
-      // Validate subcategory to avoid SQL injection or invalid values
-      const validSubs = ['tools', 'decoration', 'plants', 'flowers', 'miscellaneous'];
       if (!validSubs.includes(subcategory)) {
         return res.status(400).json({ message: "Invalid subcategory" });
       }
-      items = db.prepare(
-        "SELECT * FROM requests WHERE status = 'approved' AND subcategory = ?"
-      ).all(subcategory);
-    } else {
-      items = db.prepare("SELECT * FROM requests WHERE status = 'approved'").all();
+
+      query += " AND subcategory = ?";
+      params.push(subcategory);
     }
 
+    const items = db.prepare(query).all(...params);
     res.json(items);
+
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch approved items" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch store items" });
   }
 });
+
 
 // ==========================
 // GET approved job listings (public) with all needed fields

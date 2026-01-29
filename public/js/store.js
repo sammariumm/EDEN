@@ -1,53 +1,101 @@
-const subcategoryFilter = document.getElementById("subcategoryFilter");
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("store-items");
+  const subcategorySelect = document.getElementById("subcategoryFilter");
+
+  // ⛔ Not on store page — exit silently
+  if (!container) {
+    console.warn("store.js loaded on a non-store page");
+    return;
+  }
+
+  // Initial load
+  loadStoreItems();
+
+  // Subcategory filter (if present)
+  if (subcategorySelect) {
+    subcategorySelect.addEventListener("change", () => {
+      loadStoreItems(subcategorySelect.value);
+    });
+  }
+});
 
 async function loadStoreItems(subcategory = "") {
+  const container = document.getElementById("store-items");
+
+  // Double safety
+  if (!container) return;
+
   try {
     let url = "/requests/approved";
+
     if (subcategory) {
       url += `?subcategory=${encodeURIComponent(subcategory)}`;
     }
 
+    console.log("Fetching:", url);
+
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch store items");
+    if (!res.ok) {
+      throw new Error("Failed to fetch store items");
+    }
 
     const items = await res.json();
-    const container = document.getElementById("storeContainer");
+    container.innerHTML = "";
 
-    if (items.length === 0) {
-      container.innerHTML = "<p>No approved items found.</p>";
+    // 🔒 HARD FILTER — store items only
+    const storeItems = items.filter(item => item.type === "store");
+
+    if (storeItems.length === 0) {
+      container.innerHTML = "<p>No store items found.</p>";
       return;
     }
 
-    container.innerHTML = ""; // Clear previous content
-
-    items.forEach(item => {
+    storeItems.forEach(item => {
       const card = document.createElement("div");
-      card.className = "item-card";
-
-      const imgSrc = item.image ? item.image : "https://via.placeholder.com/250x150?text=No+Image";
+      card.className = "store-card";
 
       card.innerHTML = `
-        <img src="${imgSrc}" alt="${item.title}" />
-        <div class="item-title">${item.title}</div>
-        <div class="item-desc">${item.description}</div>
-        <div class="item-price">
-          ${item.price ? "$" + item.price.toFixed(2) : "Price not set"}
-        </div>
+        <img src="${item.image ?? '/images/placeholder.png'}" alt="${item.title}">
+        <h3>${item.title}</h3>
+        <p>${item.description}</p>
+        <p class="price">₱${(item.price / 10).toFixed(2)}</p>
+        <button class="add-to-cart" data-id="${item.id}">
+          Add to Cart
+        </button>
       `;
 
       container.appendChild(card);
     });
 
+    document.querySelectorAll(".add-to-cart").forEach(btn => {
+      btn.addEventListener("click", () => {
+        addToCart(btn.dataset.id);
+      });
+    });
+
   } catch (err) {
-    console.error(err);
-    document.getElementById("storeContainer").innerHTML = "<p>Failed to load store items.</p>";
+    console.error("Store error:", err);
+    container.innerHTML = "<p>Error loading store items.</p>";
   }
 }
 
-// Initial load - no filter
-loadStoreItems();
+/* ==========================
+   CART (localStorage)
+   ========================== */
+function addToCart(productId) {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-// Reload items when filter changes
-subcategoryFilter.addEventListener("change", () => {
-  loadStoreItems(subcategoryFilter.value);
-});
+  const existing = cart.find(item => item.id === Number(productId));
+
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({
+      id: Number(productId),
+      quantity: 1
+    });
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("Item added to cart");
+}

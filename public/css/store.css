@@ -1,0 +1,33 @@
+/* ==========================
+   Store Grid Layout
+   ========================== */
+
+#store-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+/* ==========================
+   Store Item Card
+   ========================== */
+
+.store-card {
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #ffffff;
+}
+
+/* ==========================
+   Store Card Image
+   ========================== */
+
+.store-card img {
+  width: 100%;
+  height: 140px;        /* controls rectangle height */
+  object-fit: cover;   /* crops image instead of stretching */
+  border-radius: 4px;
+  display: block;
+}
