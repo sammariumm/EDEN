@@ -3,17 +3,87 @@
 <head>
   <title>Job Listings</title>
   <link rel="stylesheet" href="css/job_listings.css">
+  <style>
+    /* Basic styles for modal */
+    #apply-modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; top: 0; 
+      width: 100%; height: 100%; 
+      background-color: rgba(0,0,0,0.5);
+    }
+    #apply-modal .modal-content {
+      background: white;
+      margin: 10% auto;
+      padding: 20px;
+      width: 400px;
+      border-radius: 5px;
+      position: relative;
+    }
+    #apply-modal .close-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    #apply-form label {
+      display: block;
+      margin-top: 10px;
+    }
+    #apply-form input[type="text"],
+    #apply-form input[type="email"],
+    #apply-form input[type="file"] {
+      width: 100%;
+      padding: 6px;
+      margin-top: 5px;
+    }
+    #apply-form button {
+      margin-top: 15px;
+      padding: 8px 16px;
+    }
+  </style>
 </head>
 <body>
 
   <nav>
     <button onclick="goBack()">⬅ Back</button>
-    <a href="dashboard.html">Dashboard</a>
+    <a href="/dashboard.html">Dashboard</a> |
+    <a href="/store.html">Store</a> |
+    <a href="#" onclick="logout()">Logout</a>
   </nav>
 
   <h1>Approved Job Listings</h1>
 
   <div id="job-list"></div>
+
+  <!-- Modal for applying -->
+  <!-- Modal for application -->
+<div id="apply-modal" style="display:none;">
+  <div class="modal-content">
+    <span id="modal-close" style="cursor:pointer;">&times;</span>
+    <h2>Apply for Job</h2>
+    <form id="apply-form" enctype="multipart/form-data">
+      <input type="hidden" id="job-id" name="request_id" />
+      <label>
+        Name:
+        <input type="text" name="applicant_name" required />
+      </label>
+      <label>
+        Email:
+        <input type="email" name="applicant_email" required />
+      </label>
+      <label>
+        Resume (PDF only):
+        <input type="file" name="resume" accept="application/pdf" required />
+      </label>
+      <button type="submit">Submit Application</button>
+    </form>
+  </div>
+</div>
+
 
   <script src="js/job_listings.js"></script>
   <script>
