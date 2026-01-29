@@ -238,7 +238,7 @@ router.get("/jobs/approved", (req, res) => {
     `).all();
 
 
-    console.log("ROWS:", rows);
+    // console.log("ROWS:", rows);
 
     if (rows.length === 0) {
       console.log("No job listings found");

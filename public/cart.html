@@ -1,19 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Your Cart</title>
+  <title>Shopping Cart</title>
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+  <nav>
+    <a href="store.html">Back to Store</a>
+  </nav>
 
-<h1>Your Cart</h1>
+  <h1>Your Cart</h1>
+  <div id="cart-items"></div>
 
-<div id="cart-items"></div>
+  <div id="cart-summary">
+    <p>Subtotal: ₱<span id="subtotal">0.00</span></p>
+    <p>Tax (12%): ₱<span id="tax">0.00</span></p>
+    <p>Total: ₱<span id="total">0.00</span></p>
+  </div>
 
-<h2 id="cart-total"></h2>
+  <form id="payment-form">
+    <h2>Payment Details</h2>
 
-<button onclick="checkout()">Proceed to Payment</button>
+    <div class="payment-group">
+      <label for="email">Email Address</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        required
+        placeholder="user@example.com"
+      />
+    </div>
+    <div class="payment-group">
+      <label for="card-name">Cardholder Name</label>
+      <input
+        type="text"
+        id="card-name"
+        required
+        placeholder="Juan Dela Cruz"
+      />
+    </div>
 
-<script type="module" src="js/cart.js"></script>
+    <div class="payment-group">
+      <label for="card-number">Card Number</label>
+      <input
+        type="text"
+        id="card-number"
+        required
+        maxlength="19"
+        placeholder="1234 5678 9012 3456"
+      />
+    </div>
+
+    <div class="payment-row">
+      <div class="payment-group">
+        <label for="expiry">Expiry Date</label>
+        <input
+          type="month"
+          id="expiry"
+          required
+        />
+      </div>
+
+      <div class="payment-group">
+        <label for="cvv">CVV</label>
+        <input
+          type="password"
+          id="cvv"
+          required
+          maxlength="4"
+          placeholder="123"
+        />
+      </div>
+    </div>
+
+    <button id="checkout-btn" type="submit" disabled>
+      Checkout
+    </button>
+  </form>
+
+  <p id="empty-cart-message" style="display:none;">Your cart is empty.</p>
+
+  <script src="js/cart.js" defer></script>
 </body>
 </html>
