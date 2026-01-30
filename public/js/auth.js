@@ -7,17 +7,22 @@ const loginPassword = document.getElementById("loginPassword");
 const registerUsername = document.getElementById("registerUsername");
 const registerPassword = document.getElementById("registerPassword");
 
-document.getElementById("showRegister").onclick = () => {
-    loginForm.style.display = "none";
-    registerForm.style.display = "block";
-    formTitle.textContent = "Create Account";
-};
+const showRegister = document.getElementById("showRegister");
+const showLogin = document.getElementById("showLogin");
 
-document.getElementById("showLogin").onclick = () => {
-    registerForm.style.display = "none";
-    loginForm.style.display = "block";
-    formTitle.textContent = "Login";
-};
+if (showRegister && showLogin) {
+    showRegister.onclick = () => {
+        loginForm.style.display = "none";
+        registerForm.style.display = "block";
+        formTitle.textContent = "Create Account";
+    };
+
+    showLogin.onclick = () => {
+        registerForm.style.display = "none";
+        loginForm.style.display = "block";
+        formTitle.textContent = "Login";
+    };
+}
 
 function logout() {
     localStorage.removeItem("token");
