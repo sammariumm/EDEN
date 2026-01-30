@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title> Avail Now </title>
+        <link rel = "stylesheet" href = "css/avail.css">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+
+    <body>
+        <div class = "nav-bar">
+            <header>
+                <nav class = "navigation_bar">
+                    <div class = "navigation">
+                        <a href = "index.html"> Home </a>
+                        <a href = "eventservices.html"> Event Services </a>
+                        <a href = "joblistings.html"> Job Listings </a>
+                        <a href = "store.html"> Store </a>
+                        <a href = "about.html"> About </a>
+                        <a href = "login.html"> Login </a>
+                    </div>
+                </nav>  
+            </header> 
+        </div>
+        
+        <div class="application-form" style = "background-image: url(uploads/bg-img-3.png); background-size: cover;">
+            <h1 class="text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-black">Avail Form</h1>
+            <form id="paymentForm" class="p-6 sm:p-8 rounded-xl w-full max-w-md space-y-6" novalidate>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="firstName" class="block text-sm font-semibold mb-1 text-black">First Name</label>
+                        <input
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            required
+                            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                            placeholder="John"
+                            aria-describedby="firstNameError"
+                            pattern="[A-Za-z ]{2,}"
+                        />
+                        <p id="firstNameError" class="error-message hidden">Please enter a valid first name (min 2 letters).</p>
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-semibold mb-1 text-black">Last Name</label>
+                        <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            required
+                            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                            placeholder="Doe"
+                            aria-describedby="lastNameError"
+                            pattern="[A-Za-z ]{2,}"
+                        />
+                        <p id="lastNameError" class="error-message hidden">Please enter a valid last name (min 2 letters).</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-semibold mb-1 text-black">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                        placeholder="john@example.com"
+                        aria-describedby="emailError"
+                    />
+                    <p id="emailError" class="error-message hidden">Please enter a valid email address.</p>
+                </div>
+
+                <div>
+                    <label for="contact-number" class="block text-sm font-semibold mb-1 text-black">Contact Number</label>
+                    <input
+                        type="text"
+                        id="contact_number"
+                        name="contact_number"
+                        required
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                        placeholder="0912 345 6789"
+                        aria-describedby="contactNumberError"
+                    />
+                    <p id="contactNumberError" class="error-message hidden">Please enter a valid number.</p>
+                </div>
+
+                <hr class="my-6 border-gray-300" />
+
+                <h2 class="text-xl font-semibold mb-4 text-black">Payment Details</h2>
+
+                <div>
+                <label class="block text-sm font-semibold mb-2 text-black">Select Payment Method</label>
+                <div id="paymentMethods" class="flex gap-2 sm:gap-4 flex-wrap" role="radiogroup" aria-label="Payment Methods">
+                    <button type="button" class="payment-method-btn" data-method="gcash" aria-label="Gcash" aria-pressed="false" tabindex="0">
+                    <img src="uploads/Gcash.jpg" alt="Gcash logo" class="w-8 h-8 object-contain" />
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="amex" aria-label="American Express" aria-pressed="false" tabindex="-1">
+                    <img src="uploads/amex.png" alt="American Express logo" class="w-8 h-8 object-contain" />
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="googlepay" aria-label="Google Pay" aria-pressed="false" tabindex="-1">
+                    <img src="uploads/googlepay.png" alt="Google Pay logo" class="w-8 h-8 object-contain" />
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="debitcard" aria-label="Debit Card" aria-pressed="false" tabindex="-1">
+                    <img src="uploads/debitcard.webp" alt="Debit Card logo" class="w-8 h-8 object-contain" />
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="paypal" aria-label="Paypal" aria-pressed="false" tabindex="-1">
+                    <img src="uploads/paypal.png" alt="Paypal logo" class="w-8 h-8 object-contain" />
+                    </button>
+                </div>
+                <p id="paymentMethodError" class="error-message hidden">Please select a payment method.</p>
+                </div>
+
+                <div id="cardDetailsSection" class="space-y-4 hidden">
+                <div>
+                    <label for="cardName" class="block text-sm font-semibold mb-1 text-black">Cardholder Name</label>
+                    <input
+                    type="text"
+                    id="cardName"
+                    name="cardName"
+                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                    placeholder="John Doe"
+                    aria-describedby="cardNameError"
+                    pattern="[A-Za-z ]{5,}"
+                    />
+                    <p id="cardNameError" class="error-message hidden">Please enter the full name on your card.</p>
+                </div>
+                <div>
+                    <label for="cardNumber" class="block text-sm font-semibold mb-1 text-black">Card Number</label>
+                    <input
+                    type="text"
+                    id="cardNumber"
+                    name="cardNumber"
+                    maxlength="19"
+                    pattern="\d{13,19}"
+                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                    placeholder="1234 5678 9012 3456"
+                    inputmode="numeric"
+                    aria-describedby="cardNumberError"
+                    />
+                    <p id="cardNumberError" class="error-message hidden">Please enter a valid 13-19 digit card number.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                    <label for="expiry" class="block text-sm font-semibold mb-1 text-black">Expiry Date (MM/YY)</label>
+                    <input
+                        type="text"
+                        id="expiry"
+                        name="expiry"
+                        pattern="(0[1-9]|1[0-2])\/?([0-9]{2})"
+                        maxlength="5"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                        placeholder="MM/YY"
+                        inputmode="numeric"
+                        aria-describedby="expiryError"
+                    />
+                    <p id="expiryError" class="error-message hidden">Please enter a valid expiry date (MM/YY).</p>
+                    </div>
+                    <div class="flex-1">
+                    <label for="cvv" class="block text-sm font-semibold mb-1 text-black">CVV</label>
+                    <input
+                        type="password"
+                        id="cvv"
+                        name="cvv"
+                        pattern="\d{3,4}"
+                        maxlength="4"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
+                        placeholder="123"
+                        inputmode="numeric"
+                        aria-describedby="cvvError"
+                    />
+                    <p id="cvvError" class="error-message hidden">Please enter a valid 3-4 digit CVV.</p>
+                    </div>
+                </div>
+                </div>
+
+                <hr class="my-6 border-gray-300" />
+
+                <button
+                type="submit"
+                class="w-full bg-[#798645] text-white font-semibold py-3 rounded-lg hover:bg-[#505B39] transition"
+                >
+                Avail Now
+                </button>
+                <p class="wait">For confirmation and inquiries, please wait for our E-mail.</p>
+            </form>
+
+            <script src="Assets/JS/avail.js"></script>
+        </div>
+    </body>
+</html>

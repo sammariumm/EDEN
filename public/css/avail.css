@@ -1,0 +1,180 @@
+.navigation_bar 
+{
+    overflow: hidden;
+    font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
+    width: 100%;
+    top: 0px;
+}
+
+body
+{
+    font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
+}
+
+.application-form h1 {
+    font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
+     -webkit-animation: shift 1s ;
+    animation: shift 1s ;
+}
+
+header
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px 100px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 100;
+}
+
+.navigation
+{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.navigation a
+{
+    float: left;
+    color: #505B39;
+    text-align: center;
+    text-decoration: none;
+    margin-right: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.navigation a:hover, 
+.navigation a.active
+{
+    color: #FEFAE0;
+    background: #505B39;
+    border-radius: 25px;
+    transition: box-shadow 0.2s;
+}
+
+.navigation a:hover
+{
+    opacity: 0.8;
+    box-shadow: 0px 5px 10px rgba(165, 156, 156, 0.8);
+}
+  
+form {
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    -webkit-animation: appear 1.75s ;
+    animation: appear 1.75s ;
+  }
+
+    @keyframes appear {
+   0% {opacity:0;}
+  33% {margin-top:125px;opacity:0;}
+  100% {margin-top:0px;opacity:1;}
+}
+
+@keyframes shift {
+   0% {opacity:0;}
+  50% {opacity:0;}
+  100% {opacity:1;}
+}
+  
+  .payment-method-btn {
+    width: 56px;
+    height: 56px;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+  }
+  
+  .payment-method-btn:hover,
+  .payment-method-btn:focus {
+    background-color: #d7e4e3;
+    outline: none;
+    border-color: #7BA9A8;
+    box-shadow: 0 0 0 2px #7BA9A8;
+  }
+  
+  .payment-method-btn.selected {
+    border-color: #7BA9A8;
+    background-color: #d7e4e3;
+    box-shadow: 0 0 0 2px #7BA9A8;
+  }
+  
+  .error-message {
+    color: #b91c1c;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  input:focus {
+    border-color: #7BA9A8 !important;
+    box-shadow: 0 0 0 2px #a3c1bb !important;
+  }
+  
+  button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px #a3c1bb;
+  }
+  
+  #planButtons button.selected {
+    border-color: #7BA9A8;
+    background-color: #d7e4e3;
+    color: #3f6f6e;
+  }
+  
+  @media (max-width: 640px) {
+    .payment-method-btn {
+      width: 48px;
+      height: 48px;
+    }
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  /* Demo card fill button styles */
+  #fillDemoCardBtn {
+    transition: all 0.3s ease;
+  }
+  
+  #fillDemoCardBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  #fillDemoCardBtn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+  
+  #fillDemoCardBtn i {
+    transition: all 0.3s ease;
+  }
+
+/* Center the application form */
+.application-form {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    min-height: 100vh; /* Full height of the viewport */
+    padding: 20px; /* Optional: Add some padding */
+}
+
+.wait {
+  text-align: center;
+}
