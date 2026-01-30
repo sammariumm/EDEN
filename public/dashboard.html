@@ -49,9 +49,20 @@
         </form>
 
         <h3>Your Requests</h3>
-        <ul id="userRequests"></ul>
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Title</th>
+              <th>Details</th>
+              <th>Status</th>
+              <th>Image</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="userRequests"></tbody>
+        </table>
 
-        <!-- New Applications Section -->
         <h3>Applications to Your Job Listings</h3>
         <table>
             <thead>
@@ -61,6 +72,7 @@
                     <th>Applicant Email</th>
                     <th>Submitted At</th>
                     <th>Resume</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="userApplications"></tbody>
@@ -84,7 +96,6 @@
             <tbody id="adminRequests"></tbody>
         </table>
 
-        <!-- New Applications Section -->
         <h3>Applications to Your Job Listings</h3>
         <table>
             <thead>
@@ -94,12 +105,26 @@
                     <th>Applicant Email</th>
                     <th>Submitted At</th>
                     <th>Resume</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="adminApplications"></tbody>
         </table>
-    </section>
 
+        <h3>All Posts</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminAllPosts"></tbody>
+        </table>
+    </section>
 
     <script src="js/dashboard.js"></script>
 
