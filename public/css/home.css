@@ -753,7 +753,7 @@ text-decoration: none
   );
 
   & img {
-    --time: 0.001s;
+    --time: 35s;
     position: relative;
     width: 105%;
     border-radius: 20px;
@@ -797,7 +797,7 @@ text-decoration: none
   );
 
   & img {
-    --time: 0.001s;
+    --time: 35s;
     position: relative;
     width: 105%;
     border-radius: 20px;
@@ -841,7 +841,7 @@ text-decoration: none
   );
 
   & img {
-    --time: 0.001s;
+    --time: 35s;
     position: relative;
     width: 105%;
     border-radius: 20px;

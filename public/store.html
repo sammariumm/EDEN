@@ -1,59 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/store.css" />
-  <title>Store</title>
+  <title> EDEN </title>
+    <meta charset="UTF-8" />
+    <link rel = "stylesheet" href = "css/store.css">
+    <link rel = "stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta name ="viewport" content = "width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <button id="backButton">Go Back</button>
-    <script>
-    document.getElementById('backButton').addEventListener('click', () => {
-        history.back();
-    });
-    </script>
     
-    <!--
-    <a href="cart.html" id="cart-link">Go to Cart 🛒</a>
-    <nav>
-        <a href="/dashboard.html">Dashboard</a> |
-        <a href="/store.html">Store</a> |
-        <a href="/job_listings.html">Job Listings</a> |
-        <a href="#" onclick="logout()">Logout</a>
-    </nav>-->
-    
+    <header>
+        <nav class = "navigation_bar">
+            <div class = "navigation">
+                <a href = "index.html"> Home </a>
+                <a href = "eventservices.html"> Event Services </a>
+                <a href = "job_listings.html"> Job Listings </a>
+                <a href = "store.html" class = "active"> Store </a>
+                <a href = "about.html"> About </a>
+                <a href = "login.html"> Login </a>
+                <a href="cart.html" id="cart-link">
+                    <img src = "uploads/cart.png" style = "width: 100%; height: 40px;">  
+                    <!--<div class = "cart-quantity js-cart-quantity"> 0 </div>-->
+                </a>
+            </div>
+        </nav>  
+    </header>
 
-    <nav>
-      <div class = "navigation">
-          <a href = "index.html"> Home </a>
-          <a href = "eventservices.html"> Event Services </a>
-          <a href = "joblistings.html"> Job Listings </a>
-          <a href = "store.html"> Store </a>
-          <a href = "about.html" class = "active"> About </a>
-          <a href="cart.html" id="cart-link">Go to Cart 🛒</a>
-          <a href = "login.html"> Login </a>
-      </div>
-      <a href="#" onclick="logout()">Logout</a>
-    </nav>
+    <section class = "promo">
+      <h2 id = "text" class = "text"> Store </h2>
+      <h3 id = "tagline" class = "tagline"> we have it all right here. </h3>
+          <video class = "video-bg" autoplay muted loop>
+              <source src="uploads/store_promo.mp4" type="video/mp4">
+          </video>
+    </section>
 
-    <h1>Store</h1>
-      <select id="subcategory-filter">
-        <option value="all">All</option>
-        <option value="tools">Tools</option>
-        <option value="decoration">Decoration</option>
-        <option value="plants">Plants</option>
-        <option value="flowers">Flowers</option>
-        <option value="miscellaneous">Miscellaneous</option>
-      </select>
-
+  <section class = "filler1">
+     <select id="subcategory-filter">
+          <option value="all">All</option>
+          <option value="tools">Tools</option>
+          <option value="decoration">Decoration</option>
+          <option value="plants">Plants</option>
+          <option value="flowers">Flowers</option>
+          <option value="miscellaneous">Miscellaneous</option>
+        </select>
+  </section>
 
       <div id="store-items"></div>
+
+  <section class = "filler2"></section>
 
 
   <div class="store-container" id="storeContainer">
     <!-- Items will be inserted here -->
   </div>
+
+  <section id="footer">
+        <div class="main-footer">
+          <div class="logoinfo" data-aos="fade-up">
+            <h2>Welcome to Eden!</h2>
+            <p>Cultivating Paradise, One Garden at a Time</p>
+      
+            <div class="contact-details">
+              <h1>Contact Us</h1>
+              <li>
+                <div class="fa fa-phone"></div><a href="tel:+630987654321">+63 0987654321</a></li>
+              <li>
+                <div class="fa fa-envelope"></div><a href="mailto:eden@gmail.com">eden@gmail.com</a></li>
+              </li>
+          </div>
+        </div>
+        <div class="com " data-aos="fade-up">
+          <h1>Eden</h1>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="eventservices.html">Event Services</a></li>
+            <li><a href="job_listings.html">Job Listings</a></li>
+            <li><a href="store.html">Store</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div class="info" data-aos="fade-up">
+          <h1>Social Media</h1>
+          <div class="sociallogos">
+            <div class="logobox">
+              <a href="https://www.tiktok.com/@edengarden2025?_t=ZS-8v557sJxLam&_r=1" target="_blank" rel="noopener noreferrer"><img src="uploads/tiktok.png" style="width:40px;height:40px;"></a>
+              <a href="https://www.instagram.com/edenparadisegarden?igsh=d3dxeDFyMjZ6MGIx&utm_source=qr" target="_blank" rel="noopener noreferrer"><img src="uploads/instagram.png" style="width:40px;height:40px;"></a>
+              <a href="https://www.facebook.com/share/1BvDCAfEMm/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"><img src="uploads/facebook.png"style="width:40px;height:40px;"></a>
+            </div>
+          </div>
+        </div>
+        </div>
+      <footer>Copyright © 2025 Eden. All Rights Reserved.</footer>
+      </section>
 
   <script type="module" src="js/store.js"></script>
 
