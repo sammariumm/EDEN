@@ -1,179 +1,91 @@
-// cart.js
+import {
+  loadCart,
+  saveCart,
+  updateCartCount
+} from "./cartUtils.js";
+
+const cartItemsContainer = document.getElementById("cart-items");
+const emptyCartMsg = document.getElementById("empty-cart-message"); // Fixed ID here
+const checkoutBtn = document.getElementById("checkout-btn");
+const subtotalEl = document.getElementById("subtotal");
+const totalEl = document.getElementById("total");
+
+let cart = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  const cartItemsContainer = document.getElementById("cart-items");
-  const subtotalEl = document.getElementById("subtotal");
-  const taxEl = document.getElementById("tax");
-  const totalEl = document.getElementById("total");
-  const checkoutBtn = document.getElementById("checkout-btn");
-  const paymentForm = document.getElementById("payment-form");
-  const emptyCartMsg = document.getElementById("empty-cart-message");
-  const cardNumberInput = document.getElementById("card-number");
-  const emailInput = document.getElementById("email");
-
-  // Format card number input
-  cardNumberInput?.addEventListener("input", () => {
-    cardNumberInput.value = cardNumberInput.value
-      .replace(/\D/g, "")
-      .replace(/(.{4})/g, "$1 ")
-      .trim();
-  });
-
-  let cart = loadCart();
   renderCart();
+  updateCartCount();
+});
 
-  // ----------------------------
-  // Load & Save Cart
-  // ----------------------------
-  function loadCart() {
-    const stored = localStorage.getItem("cart");
-    if (!stored) return [];
+function renderCart() {
+  cart = loadCart();
 
-    try {
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed)
-        ? parsed.filter(
-            i =>
-              i &&
-              i.id &&
-              i.title &&
-              typeof i.price === "number" &&
-              typeof i.quantity === "number"
-          )
-        : [];
-    } catch {
-      return [];
-    }
-  }
+  console.log("Loaded cart from eden_cart:", cart);
 
-  function saveCart() {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }
+  cartItemsContainer.innerHTML = "";
 
-  // ----------------------------
-  // Render Cart
-  // ----------------------------
-  function renderCart() {
-    cartItemsContainer.innerHTML = "";
-
-    if (cart.length === 0) {
-      emptyCartMsg.style.display = "block";
-      checkoutBtn.disabled = true;
-      updateTotals();
-      return;
-    }
-
-    emptyCartMsg.style.display = "none";
-
-    cart.forEach((item, index) => {
-      const itemDiv = document.createElement("div");
-      itemDiv.className = "cart-item";
-
-      const priceDisplay = (item.price / 10).toFixed(2);
-
-      itemDiv.innerHTML = `
-        <img src="${item.image || "/images/placeholder.png"}" alt="${item.title}">
-        <div class="item-details">
-          <div class="item-title">${item.title}</div>
-          <div>Price: ₱${priceDisplay}</div>
-          <div class="item-qty">
-            Quantity:
-            <button class="qty-decrease">-</button>
-            <span>${item.quantity}</span>
-            <button class="qty-increase">+</button>
-          </div>
-        </div>
-        <div class="item-actions">
-          <button class="remove-btn">Remove</button>
-        </div>
-      `;
-
-      itemDiv.querySelector(".qty-decrease").onclick = () => {
-        if (item.quantity > 1) {
-          item.quantity--;
-          saveCart();
-          renderCart();
-        }
-      };
-
-      itemDiv.querySelector(".qty-increase").onclick = () => {
-        item.quantity++;
-        saveCart();
-        renderCart();
-      };
-
-      itemDiv.querySelector(".remove-btn").onclick = () => {
-        cart.splice(index, 1);
-        saveCart();
-        renderCart();
-      };
-
-      cartItemsContainer.appendChild(itemDiv);
-    });
-
+  if (cart.length === 0) {
+    emptyCartMsg.style.display = "block";
+    checkoutBtn.disabled = true;
     updateTotals();
-    checkoutBtn.disabled = !paymentForm.checkValidity();
+    return;
   }
 
-  // ----------------------------
-  // Totals
-  // ----------------------------
-  function updateTotals() {
-    const subtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    const tax = subtotal * 0.12;
-    const total = subtotal + tax;
+  emptyCartMsg.style.display = "none";
+  checkoutBtn.disabled = false;
 
-    subtotalEl.textContent = (subtotal / 10).toFixed(2);
-    taxEl.textContent = (tax / 10).toFixed(2);
-    totalEl.textContent = (total / 10).toFixed(2);
-  }
+  cart.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "cart-row";
 
-  paymentForm.addEventListener("input", () => {
-    checkoutBtn.disabled = !paymentForm.checkValidity() || cart.length === 0;
+    row.innerHTML = `
+      <img src="${item.image}" alt="${item.title}">
+      <span class="title">${item.title}</span>
+      <input type="number" min="1" value="${item.quantity}" data-index="${index}">
+      <span class="price">₱${((item.price * item.quantity) / 10).toFixed(2)}</span>
+      <button class="remove-btn" data-index="${index}">✕</button>
+    `;
+
+    cartItemsContainer.appendChild(row);
   });
 
-  // ----------------------------
-  // Checkout → Send Email
-  // ----------------------------
-  paymentForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  attachCartEvents();
+  updateTotals();
+}
 
-      const email = document.getElementById("email").value.trim();
-
-      if (!email) {
-        alert("Email is required");
-        return;
-      }
-
-      try {
-        const res = await fetch("/orders/checkout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            cart,
-            total: totalEl.textContent
-          })
-        });
-
-        if (!res.ok) throw new Error("Checkout failed");
-
-        alert("Order placed! Receipt sent to email.");
-
-        cart = [];
-        localStorage.removeItem("cart");
-        renderCart();
-        paymentForm.reset();
-
-      } catch (err) {
-        console.error(err);
-        alert("Checkout failed");
-      }
+function attachCartEvents() {
+  document.querySelectorAll(".remove-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = btn.dataset.index;
+      cart.splice(index, 1);
+      saveCart(cart);
+      renderCart();
+      updateCartCount();
     });
+  });
 
-});
+  document.querySelectorAll("input[type='number']").forEach(input => {
+    input.addEventListener("change", () => {
+      const index = input.dataset.index;
+      const value = Math.max(1, Number(input.value));
+      cart[index].quantity = value;
+      saveCart(cart);
+      renderCart();
+      updateCartCount();
+    });
+  });
+}
+
+function updateTotals() {
+  const subtotal = cart.reduce(
+    (sum, item) => sum + (item.price * item.quantity) / 10,
+    0
+  );
+
+  const tax = (subtotal * 0.12);
+  const total = (subtotal + tax);
+
+  subtotalEl.textContent = `₱${subtotal.toFixed(2)}`;
+  document.getElementById("tax").textContent = `₱${tax.toFixed(2)}`;
+  totalEl.textContent = `₱${total.toFixed(2)}`;
+}

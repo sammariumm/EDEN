@@ -39,3 +39,18 @@ export function getCartTotal() {
     0
   );
 }
+
+export function getCartItemCount() {
+  return getCart().reduce((sum, item) => sum + item.quantity, 0);
+}
+
+// Add these exports to match what cart.js expects
+export function loadCart() {
+  return getCart();
+}
+
+export function updateCartCount() {
+  const cartCountEl = document.getElementById("cart-count");
+  if (!cartCountEl) return;
+  cartCountEl.textContent = getCartItemCount();
+}
