@@ -7,13 +7,13 @@
 </head>
 <body>
     <nav>
-        <div class = "navigation">
-            <a href = "index.html"> Home </a>
-            <a href = "eventservices.html"> Event Services </a>
-            <a href = "joblistings.html"> Job Listings </a>
-            <a href = "store.html"> Store </a>
-            <a href = "about.html" class = "active"> About </a>
-            <a href = "login.html"> Login </a>
+        <div class="navigation">
+            <a href="index.html">Home</a>
+            <a href="eventservices.html">Event Services</a>
+            <a href="job_listings.html">Job Listings</a>
+            <a href="store.html">Store</a>
+            <a href="about.html" class="active">About</a>
+            <a href="login.html">Login</a>
         </div>
     </nav>
 
@@ -54,17 +54,17 @@
 
         <h3>Your Requests</h3>
         <table>
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Title</th>
-              <th>Details</th>
-              <th>Status</th>
-              <th>Image</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="userRequests"></tbody>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                    <th>Image</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userRequests"></tbody>
         </table>
 
         <h3>Applications to Your Job Listings</h3>
@@ -130,15 +130,7 @@
         </table>
     </section>
 
-    <script src="js/dashboard.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                logout();
-            });
-        });
-    </script>
-
+    <!-- Load your dashboard script -->
+    <script src="js/dashboard.js" defer></script>
 </body>
 </html>

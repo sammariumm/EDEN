@@ -9,31 +9,47 @@ const API_HEADERS = () => ({
 // ENTRY POINT
 // ==========================
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("logoutBtn").addEventListener("click", logout);
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) logoutBtn.addEventListener("click", logout);
 
-  document.getElementById("jobRequestForm").addEventListener("submit", submitJobRequest);
-  document.getElementById("storeRequestForm").addEventListener("submit", submitStoreRequest);
+  const jobRequestForm = document.getElementById("jobRequestForm");
+  if (jobRequestForm) jobRequestForm.addEventListener("submit", submitJobRequest);
+
+  const storeRequestForm = document.getElementById("storeRequestForm");
+  if (storeRequestForm) storeRequestForm.addEventListener("submit", submitStoreRequest);
+
+  const serviceAvailRequestForm = document.getElementById("serviceAvailRequestForm");
+  if (serviceAvailRequestForm) serviceAvailRequestForm.addEventListener("submit", submitServiceAvailRequest);
 
   loadDashboard();
+  loadServiceAvailJobsDropdown();
 });
 
 // ==========================
 // DASHBOARD LOADER
 // ==========================
 async function loadDashboard() {
-  const res = await fetch("/users/me", { headers: API_HEADERS() });
-  if (!res.ok) {
+  try {
+    const res = await fetch("/users/me", { headers: API_HEADERS() });
+    if (!res.ok) {
+      logout();
+      return;
+    }
+
+    const user = await res.json();
+    const welcomeElem = document.getElementById("welcome");
+    if (welcomeElem) {
+      welcomeElem.textContent = `Welcome, ${user.username}`;
+    }
+
+    if (user.isAdmin) {
+      showAdminDashboard();
+    } else {
+      showUserDashboard();
+    }
+  } catch (err) {
+    console.error("Error loading dashboard:", err);
     logout();
-    return;
-  }
-
-  const user = await res.json();
-  document.getElementById("welcome").textContent = `Welcome, ${user.username}`;
-
-  if (user.isAdmin) {
-    showAdminDashboard();
-  } else {
-    showUserDashboard();
   }
 }
 
@@ -41,16 +57,22 @@ async function loadDashboard() {
 // DASHBOARD VISIBILITY
 // ==========================
 function showUserDashboard() {
-  document.getElementById("userDashboard").style.display = "block";
-  document.getElementById("adminDashboard").style.display = "none";
+  const userDash = document.getElementById("userDashboard");
+  const adminDash = document.getElementById("adminDashboard");
+
+  if (userDash) userDash.style.display = "block";
+  if (adminDash) adminDash.style.display = "none";
 
   loadUserRequests();
   loadUserApplications();
 }
 
 function showAdminDashboard() {
-  document.getElementById("adminDashboard").style.display = "block";
-  document.getElementById("userDashboard").style.display = "none";
+  const userDash = document.getElementById("userDashboard");
+  const adminDash = document.getElementById("adminDashboard");
+
+  if (adminDash) adminDash.style.display = "block";
+  if (userDash) userDash.style.display = "none";
 
   loadAdminPendingRequests();
   loadAdminAllRequests();
@@ -61,259 +83,324 @@ function showAdminDashboard() {
 // LOAD USER REQUESTS
 // ==========================
 async function loadUserRequests() {
-  const res = await fetch("/requests/my", { headers: API_HEADERS() });
-  if (!res.ok) {
-    console.error("Failed to load user requests");
-    return;
+  try {
+    const res = await fetch("/requests/my", { headers: API_HEADERS() });
+    if (!res.ok) {
+      console.error("Failed to load user requests");
+      return;
+    }
+
+    const requests = await res.json();
+    const tbody = document.getElementById("userRequests");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (requests.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6">No requests found.</td></tr>`;
+      return;
+    }
+
+    requests.forEach((r) => {
+      let typeText = "";
+      let details = "";
+
+      if (r.type === "job_listing") {
+        typeText = "Job Listing";
+        details = `₱${r.hourly_rate}/hr`;
+      } else if (r.type === "store") {
+        typeText = "Store";
+        details = `₱${r.price} (${r.subcategory})`;
+      } else if (r.type === "service_avail") {
+        typeText = "Service Avail";
+        details = r.parent_job_title
+          ? `Linked to job: <strong>${r.parent_job_title}</strong>`
+          : "Linked job info not available";
+      } else {
+        typeText = r.type || "Unknown";
+        details = "";
+      }
+
+      const imageHtml = r.image
+        ? `<img src="${r.image}" style="max-width:80px; display:block; margin-top:5px;">`
+        : "—";
+
+      const statusText = r.status === "deleted" ? "Deleted" : r.status;
+
+      const actionHtml =
+        r.status === "deleted"
+          ? "—"
+          : `<button class="delete-request" data-id="${r.id}">Delete</button>`;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${typeText}</td>
+        <td>${r.title}</td>
+        <td>${details}</td>
+        <td>${statusText}</td>
+        <td>${imageHtml}</td>
+        <td>${actionHtml}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error loading user requests:", err);
   }
-
-  const requests = await res.json();
-  const tbody = document.getElementById("userRequests");
-  tbody.innerHTML = "";
-
-  if (requests.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6">No requests found.</td></tr>`;
-    return;
-  }
-
-  requests.forEach((r) => {
-    const tr = document.createElement("tr");
-
-    const typeText = r.type === "job_listing" ? "Job Listing" : "Store";
-    const details = r.type === "job_listing" ? `$${r.hourly_rate}/hr` : `$${r.price} (${r.subcategory})`;
-
-    const imageHtml = r.image
-      ? `<img src="${r.image}" style="max-width:80px; display:block; margin-top:5px;">`
-      : "—";
-
-    // If status is deleted, no delete button and show "Deleted" status
-    const statusText = r.status === "deleted" ? "Deleted" : r.status;
-
-    const actionHtml =
-      r.status === "deleted"
-        ? "—" // No delete button for deleted posts
-        : `<button class="delete-request" data-id="${r.id}">Delete</button>`;
-
-    tr.innerHTML = `
-      <td>${typeText}</td>
-      <td>${r.title}</td>
-      <td>${details}</td>
-      <td>${statusText}</td>
-      <td>${imageHtml}</td>
-      <td>${actionHtml}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
 }
 
 // ==========================
 // LOAD USER APPLICATIONS
 // ==========================
 async function loadUserApplications() {
-  const res = await fetch("/applications/user", { headers: API_HEADERS() });
-  if (!res.ok) {
-    console.error("Failed to load user applications");
-    return;
+  try {
+    const res = await fetch("/applications/user", { headers: API_HEADERS() });
+    if (!res.ok) {
+      console.error("Failed to load user applications");
+      return;
+    }
+
+    const applications = await res.json();
+    const tbody = document.getElementById("userApplications");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (applications.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6">No applications received yet.</td></tr>`;
+      return;
+    }
+
+    applications.forEach((app) => {
+      const submittedDate = new Date(app.submitted_at).toLocaleString();
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${app.job_title}</td>
+        <td>${app.applicant_name}</td>
+        <td>${app.applicant_email}</td>
+        <td>${submittedDate}</td>
+        <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
+        <td><button class="delete-application" data-id="${app.id}">Delete</button></td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error loading user applications:", err);
   }
-
-  const applications = await res.json();
-  const tbody = document.getElementById("userApplications");
-  tbody.innerHTML = "";
-
-  if (applications.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6">No applications received yet.</td></tr>`;
-    return;
-  }
-
-  applications.forEach((app) => {
-    const submittedDate = new Date(app.submitted_at).toLocaleString();
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${app.job_title}</td>
-      <td>${app.applicant_name}</td>
-      <td>${app.applicant_email}</td>
-      <td>${submittedDate}</td>
-      <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
-      <td><button class="delete-application" data-id="${app.id}">Delete</button></td>
-    `;
-
-    tbody.appendChild(tr);
-  });
 }
 
 // ==========================
 // LOAD ADMIN PENDING REQUESTS
 // ==========================
 async function loadAdminPendingRequests() {
-  const res = await fetch("/requests/pending", { headers: API_HEADERS() });
-  if (!res.ok) {
-    console.error("Failed to load admin pending requests");
-    return;
+  try {
+    const res = await fetch("/requests/pending", { headers: API_HEADERS() });
+    if (!res.ok) {
+      console.error("Failed to load admin pending requests");
+      return;
+    }
+
+    const requests = await res.json();
+    const tbody = document.getElementById("adminRequests");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (requests.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4">No pending requests found.</td></tr>`;
+      return;
+    }
+
+    requests.forEach((r) => {
+      let details = "";
+
+      if (r.type === "job_listing") {
+        details = `₱${r.hourly_rate}/hr`;
+      } else if (r.type === "store") {
+        details = `₱${r.price} (${r.subcategory})`;
+      } else if (r.type === "service_avail") {
+        details = ""; // no peso or price for service avail
+      } else {
+        details = "";
+      }
+
+      const imageHtml = r.image
+        ? `<img src="${r.image}" style="max-width:80px; display:block; margin-top:5px;">`
+        : "—";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.username}</td>
+        <td>${r.type}</td>
+        <td>
+          <strong>${r.title}</strong><br>
+          ${details}<br>
+          ${imageHtml}
+        </td>
+        <td>
+          <button onclick="approveRequest(${r.id})">Approve</button>
+          <button onclick="rejectRequest(${r.id})">Reject</button>
+          <button class="delete-request" data-id="${r.id}">Delete</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("Error loading admin pending requests:", err);
   }
-
-  const requests = await res.json();
-  const tbody = document.getElementById("adminRequests");
-  tbody.innerHTML = "";
-
-  if (requests.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4">No pending requests found.</td></tr>`;
-    return;
-  }
-
-  requests.forEach((r) => {
-    const tr = document.createElement("tr");
-
-    const details = r.type === "job_listing" ? `$${r.hourly_rate}/hr` : `$${r.price} (${r.subcategory})`;
-
-    const imageHtml = r.image
-      ? `<img src="${r.image}" style="max-width:80px; display:block; margin-top:5px;">`
-      : "—";
-
-    tr.innerHTML = `
-      <td>${r.username}</td>
-      <td>${r.type}</td>
-      <td>
-        <strong>${r.title}</strong><br>
-        ${details}<br>
-        ${imageHtml}
-      </td>
-      <td>
-        <button onclick="approveRequest(${r.id})">Approve</button>
-        <button onclick="rejectRequest(${r.id})">Reject</button>
-        <button class="delete-request" data-id="${r.id}">Delete</button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
 }
 
 // ==========================
 // LOAD ADMIN ALL REQUESTS (ALL POSTS)
 // ==========================
 async function loadAdminAllRequests() {
-  const res = await fetch("/requests/admin/all", { headers: API_HEADERS() });
-  if (!res.ok) {
-    console.error("Failed to load all posts");
-    return;
+  try {
+    const res = await fetch("/requests/admin/all", { headers: API_HEADERS() });
+    if (!res.ok) {
+      console.error("Failed to load all posts");
+      return;
+    }
+
+    const posts = await res.json();
+    const tbody = document.getElementById("adminAllPosts");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (posts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5">No posts found.</td></tr>`;
+      return;
+    }
+
+    posts.forEach((p) => {
+      const statusText = p.status === "deleted" ? "Deleted" : p.status;
+      const actionHtml =
+        p.status === "deleted"
+          ? "—"
+          : `<button class="delete-request" data-id="${p.id}">Delete</button>`;
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${p.username}</td>
+          <td>${p.type}</td>
+          <td>${p.title}</td>
+          <td>${statusText}</td>
+          <td>${actionHtml}</td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    console.error("Error loading admin all posts:", err);
   }
-
-  const posts = await res.json();
-  const tbody = document.getElementById("adminAllPosts");
-  tbody.innerHTML = "";
-
-  if (posts.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5">No posts found.</td></tr>`;
-    return;
-  }
-
-  posts.forEach((p) => {
-    const statusText = p.status === "deleted" ? "Deleted" : p.status;
-    const actionHtml =
-      p.status === "deleted"
-        ? "—"
-        : `<button class="delete-request" data-id="${p.id}">Delete</button>`;
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${p.username}</td>
-        <td>${p.type}</td>
-        <td>${p.title}</td>
-        <td>${statusText}</td>
-        <td>${actionHtml}</td>
-      </tr>
-    `;
-  });
 }
-
 
 // ==========================
 // LOAD ADMIN APPLICATIONS
 // ==========================
 async function loadAdminApplications() {
-  const res = await fetch("/applications/admin", { headers: API_HEADERS() });
-  if (!res.ok) {
-    console.error("Failed to load admin applications");
-    return;
+  try {
+    const res = await fetch("/applications/admin", { headers: API_HEADERS() });
+    if (!res.ok) {
+      console.error("Failed to load admin applications");
+      return;
+    }
+
+    const applications = await res.json();
+    const tbody = document.getElementById("adminApplications");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (applications.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6">No applications found.</td></tr>`;
+      return;
+    }
+
+    applications.forEach((app) => {
+      const submittedDate = new Date(app.submitted_at).toLocaleString();
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${app.job_title}</td>
+        <td>${app.applicant_name}</td>
+        <td>${app.applicant_email}</td>
+        <td>${submittedDate}</td>
+        <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
+        <td><button class="delete-application" data-id="${app.id}">Delete</button></td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error loading admin applications:", err);
   }
-
-  const applications = await res.json();
-  const tbody = document.getElementById("adminApplications");
-  tbody.innerHTML = "";
-
-  if (applications.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6">No applications found.</td></tr>`;
-    return;
-  }
-
-  applications.forEach((app) => {
-    const submittedDate = new Date(app.submitted_at).toLocaleString();
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${app.job_title}</td>
-      <td>${app.applicant_name}</td>
-      <td>${app.applicant_email}</td>
-      <td>${submittedDate}</td>
-      <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
-      <td><button class="delete-application" data-id="${app.id}">Delete</button></td>
-    `;
-
-    tbody.appendChild(tr);
-  });
 }
 
 // ==========================
 // DELETE HANDLER (GLOBAL)
 // ==========================
 document.addEventListener("click", async (e) => {
+  // Delete request button
   if (e.target.classList.contains("delete-request")) {
     const requestId = e.target.dataset.id;
     if (!confirm("Are you sure you want to delete this request?")) return;
 
-    const isAdmin = document.getElementById("adminDashboard").style.display === "block";
+    const isAdmin = document.getElementById("adminDashboard")?.style.display === "block";
     const url = isAdmin ? `/requests/admin/${requestId}` : `/requests/${requestId}`;
 
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: API_HEADERS(),
-    });
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: API_HEADERS(),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message || "Failed to delete request");
-      return;
-    }
+      if (!res.ok) {
+        alert(data.message || "Failed to delete request");
+        return;
+      }
 
-    if (isAdmin) {
-      loadAdminPendingRequests();
-      loadAdminAllRequests(); // Refresh both lists after deletion
-    } else {
-      loadUserRequests();
+      if (isAdmin) {
+        loadAdminPendingRequests();
+        loadAdminAllRequests();
+      } else {
+        loadUserRequests();
+      }
+    } catch (err) {
+      console.error("Error deleting request:", err);
+      alert("Failed to delete request. Please try again.");
     }
   }
 
+  // Delete application button
   if (e.target.classList.contains("delete-application")) {
     const applicationId = e.target.dataset.id;
     if (!confirm("Are you sure you want to delete this application?")) return;
 
-    const res = await fetch(`/applications/${applicationId}`, {
-      method: "DELETE",
-      headers: API_HEADERS(),
-    });
+    try {
+      const res = await fetch(`/applications/${applicationId}`, {
+        method: "DELETE",
+        headers: API_HEADERS(),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message || "Failed to delete application");
-      return;
+      if (!res.ok) {
+        alert(data.message || "Failed to delete application");
+        return;
+      }
+
+      const row = e.target.closest("tr");
+      if (row) row.remove();
+    } catch (err) {
+      console.error("Error deleting application:", err);
+      alert("Failed to delete application. Please try again.");
     }
-
-    const row = e.target.closest("tr");
-    if (row) row.remove();
   }
 });
 
@@ -321,21 +408,29 @@ document.addEventListener("click", async (e) => {
 // ADMIN ACTIONS
 // ==========================
 async function approveRequest(id) {
-  await fetch(`/requests/${id}/approve`, {
-    method: "POST",
-    headers: API_HEADERS(),
-  });
-  loadAdminPendingRequests();
-  loadAdminAllRequests();
+  try {
+    await fetch(`/requests/${id}/approve`, {
+      method: "POST",
+      headers: API_HEADERS(),
+    });
+    loadAdminPendingRequests();
+    loadAdminAllRequests();
+  } catch (err) {
+    console.error("Error approving request:", err);
+  }
 }
 
 async function rejectRequest(id) {
-  await fetch(`/requests/${id}/reject`, {
-    method: "POST",
-    headers: API_HEADERS(),
-  });
-  loadAdminPendingRequests();
-  loadAdminAllRequests();
+  try {
+    await fetch(`/requests/${id}/reject`, {
+      method: "POST",
+      headers: API_HEADERS(),
+    });
+    loadAdminPendingRequests();
+    loadAdminAllRequests();
+  } catch (err) {
+    console.error("Error rejecting request:", err);
+  }
 }
 
 // ==========================
@@ -346,28 +441,33 @@ async function submitJobRequest(e) {
 
   const formData = new FormData();
   formData.append("type", "job_listing");
-  formData.append("title", document.getElementById("jobTitle").value);
-  formData.append("description", document.getElementById("jobDescription").value);
-  formData.append("hourly_rate", document.getElementById("hourlyRate").value);
+  formData.append("title", document.getElementById("jobTitle")?.value || "");
+  formData.append("description", document.getElementById("jobDescription")?.value || "");
+  formData.append("hourly_rate", document.getElementById("hourlyRate")?.value || "");
 
   const jobImage = document.getElementById("jobImage");
   if (jobImage?.files[0]) {
     formData.append("image", jobImage.files[0]);
   }
 
-  const res = await fetch("/requests/create", {
-    method: "POST",
-    headers: API_HEADERS(),
-    body: formData,
-  });
+  try {
+    const res = await fetch("/requests/create", {
+      method: "POST",
+      headers: API_HEADERS(),
+      body: formData,
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      alert("Failed to submit job request.");
+      return;
+    }
+
+    e.target.reset();
+    loadUserRequests();
+  } catch (err) {
+    console.error("Error submitting job request:", err);
     alert("Failed to submit job request.");
-    return;
   }
-
-  e.target.reset();
-  loadUserRequests();
 }
 
 async function submitStoreRequest(e) {
@@ -375,33 +475,106 @@ async function submitStoreRequest(e) {
 
   const formData = new FormData();
   formData.append("type", "store");
-  formData.append("title", document.getElementById("storeTitle").value);
-  formData.append("description", document.getElementById("storeDescription").value);
-  formData.append("price", document.getElementById("price").value);
-  formData.append("subcategory", document.getElementById("storeSubcategory").value);
+  formData.append("title", document.getElementById("storeTitle")?.value || "");
+  formData.append("description", document.getElementById("storeDescription")?.value || "");
+  formData.append("price", document.getElementById("price")?.value || "");
+  formData.append("subcategory", document.getElementById("storeSubcategory")?.value || "");
 
   const storeImage = document.getElementById("storeImage");
   if (storeImage?.files[0]) {
     formData.append("image", storeImage.files[0]);
   }
 
-  const res = await fetch("/requests/create", {
-    method: "POST",
-    headers: API_HEADERS(),
-    body: formData,
-  });
+  try {
+    const res = await fetch("/requests/create", {
+      method: "POST",
+      headers: API_HEADERS(),
+      body: formData,
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      alert("Failed to submit store request.");
+      return;
+    }
+
+    e.target.reset();
+    loadUserRequests();
+  } catch (err) {
+    console.error("Error submitting store request:", err);
     alert("Failed to submit store request.");
-    return;
   }
-
-  e.target.reset();
-  loadUserRequests();
 }
 
 // ==========================
-// LOGOUT
+// LOAD APPROVED JOBS INTO SERVICE AVAIL DROPDOWN
+// ==========================
+async function loadServiceAvailJobsDropdown() {
+  try {
+    const res = await fetch("/requests/jobs/approved", { headers: API_HEADERS() });
+    if (!res.ok) {
+      console.error("Failed to load approved jobs for service avail dropdown");
+      return;
+    }
+
+    const jobs = await res.json();
+    const select = document.getElementById("parentJobId");
+    if (!select) return;
+
+    // Clear existing options except placeholder
+    select.innerHTML = `<option value="">--Select a Job--</option>`;
+
+    jobs.forEach(job => {
+      const option = document.createElement("option");
+      option.value = job.id;
+      option.textContent = `${job.title} (posted by ${job.username || 'Unknown'})`;
+      select.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Error loading service avail jobs dropdown:", err);
+  }
+}
+
+// ==========================
+// SUBMIT SERVICE AVAIL REQUEST
+// ==========================
+async function submitServiceAvailRequest(e) {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("type", "service_avail");
+  formData.append("title", document.getElementById("serviceTitle")?.value || "");
+  formData.append("description", document.getElementById("serviceDescription")?.value || "");
+  formData.append("parent_job_id", document.getElementById("parentJobId")?.value || "");
+
+  const serviceImage = document.getElementById("serviceImage");
+  if (serviceImage?.files[0]) {
+    formData.append("image", serviceImage.files[0]);
+  }
+
+  try {
+    const res = await fetch("/requests/create", {
+      method: "POST",
+      headers: API_HEADERS(),
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      alert("Failed to submit service avail request: " + (errorData.message || "Unknown error"));
+      return;
+    }
+
+    e.target.reset();
+    loadUserRequests();
+    alert("Service avail request submitted successfully!");
+  } catch (err) {
+    console.error("Error submitting service avail request:", err);
+    alert("Failed to submit service avail request.");
+  }
+}
+
+// ==========================
+// LOGOUT FUNCTION
 // ==========================
 function logout() {
   localStorage.removeItem("token");

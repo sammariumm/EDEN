@@ -38,6 +38,16 @@ function validateRequestInput(type, body) {
     );
   }
 
+  // ✅ service_avail MUST reference a job
+  if (type === "service_avail") {
+    const { title, description, parent_job_id } = body;
+    return (
+      title &&
+      description &&
+      Number.isInteger(Number(parent_job_id))
+    );
+  }
+
   return false;
 }
 
@@ -47,23 +57,27 @@ function validateRequestInput(type, body) {
 router.get("/my", authenticateToken, (req, res) => {
   const rows = db.prepare(`
     SELECT
-      id,
-      type,
-      status,
-      title,
-      description,
-      hourly_rate,
-      price,
-      subcategory,
-      image
-    FROM requests
-    WHERE user_id = ?
-      AND is_deleted = 0
-    ORDER BY id DESC
+      r.id,
+      r.type,
+      r.status,
+      r.title,
+      r.description,
+      r.hourly_rate,
+      r.price,
+      r.subcategory,
+      r.image,
+      r.parent_job_id,
+      pj.title AS parent_job_title
+    FROM requests r
+    LEFT JOIN requests pj ON r.parent_job_id = pj.id
+    WHERE r.user_id = ?
+      AND r.is_deleted = 0
+    ORDER BY r.id DESC
   `).all(req.user.id);
 
   res.json(rows);
 });
+
 
 // ==========================
 // USER: CREATE REQUEST
@@ -73,10 +87,20 @@ router.post(
   authenticateToken,
   upload.single("image"),
   (req, res) => {
-    const { type, title, description, hourly_rate, price, subcategory } = req.body;
+    const {
+      type,
+      title,
+      description,
+      hourly_rate,
+      price,
+      subcategory,
+      parent_job_id
+    } = req.body;
 
-    const parsedHourlyRate = hourly_rate !== undefined ? Number(hourly_rate) : null;
-    const parsedPrice = price !== undefined ? Number(price) : null;
+    const parsedHourlyRate =
+      hourly_rate !== undefined ? Number(hourly_rate) : null;
+    const parsedPrice =
+      price !== undefined ? Number(price) : null;
 
     const bodyForValidation = {
       type,
@@ -85,10 +109,35 @@ router.post(
       hourly_rate: parsedHourlyRate,
       price: parsedPrice,
       subcategory,
+      parent_job_id
     };
 
     if (!validateRequestInput(type, bodyForValidation)) {
       return res.status(400).json({ message: "Invalid request data" });
+    }
+
+    // --------------------------
+    // SERVICE AVAIL GUARDS
+    // --------------------------
+    if (type === "service_avail") {
+      const job = db.prepare(`
+        SELECT id, user_id
+        FROM requests
+        WHERE id = ?
+          AND type = 'job_listing'
+          AND status = 'approved'
+          AND is_deleted = 0
+      `).get(parent_job_id);
+
+      if (!job) {
+        return res.status(400).json({ message: "Invalid job reference" });
+      }
+
+      if (job.user_id === req.user.id) {
+        return res.status(403).json({
+          message: "You cannot avail your own job"
+        });
+      }
     }
 
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
@@ -104,9 +153,10 @@ router.post(
         price,
         subcategory,
         image,
+        parent_job_id,
         is_deleted
       )
-      VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, 0)
+      VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, 0)
     `).run(
       req.user.id,
       type,
@@ -115,7 +165,8 @@ router.post(
       type === "job_listing" ? parsedHourlyRate : null,
       type === "store" ? parsedPrice : null,
       type === "store" ? subcategory : null,
-      imagePath
+      imagePath,
+      type === "service_avail" ? Number(parent_job_id) : null
     );
 
     res.json({ message: "Request submitted successfully" });
@@ -136,7 +187,8 @@ router.get("/pending", authenticateToken, requireAdmin, (req, res) => {
       r.hourly_rate,
       r.price,
       r.subcategory,
-      r.image
+      r.image,
+      r.parent_job_id
     FROM requests r
     JOIN users u ON r.user_id = u.id
     WHERE r.status = 'pending'
@@ -171,46 +223,17 @@ router.post("/:id/reject", authenticateToken, requireAdmin, (req, res) => {
 });
 
 // ==========================
-// USER: DELETE OWN REQUEST (SOFT DELETE)
-// ==========================
-router.delete("/:id", authenticateToken, (req, res) => {
-  const result = db.prepare(`
-    UPDATE requests
-    SET is_deleted = 1
-    WHERE id = ? AND user_id = ?
-  `).run(req.params.id, req.user.id);
-
-  if (result.changes === 0) {
-    return res.status(403).json({ message: "Not authorized or already deleted" });
-  }
-
-  res.json({ message: "Request removed successfully" });
-});
-
-// ==========================
-// ADMIN: DELETE ANY REQUEST
-// ==========================
-router.delete(
-  "/admin/:id",
-  authenticateToken,
-  requireAdmin,
-  (req, res) => {
-    db.prepare(`
-      UPDATE requests
-      SET is_deleted = 1
-      WHERE id = ?
-    `).run(req.params.id);
-
-    res.json({ message: "Request removed by admin" });
-  }
-);
-
-// ==========================
 // STORE: GET APPROVED ITEMS
 // ==========================
 router.get("/approved", (req, res) => {
   const { subcategory } = req.query;
-  const validSubs = ['tools', 'decoration', 'plants', 'flowers', 'miscellaneous'];
+  const validSubs = [
+    "tools",
+    "decoration",
+    "plants",
+    "flowers",
+    "miscellaneous"
+  ];
 
   let query = `
     SELECT *
@@ -239,7 +262,13 @@ router.get("/approved", (req, res) => {
 // ==========================
 router.get("/jobs/approved", (req, res) => {
   const rows = db.prepare(`
-    SELECT r.id, r.title, r.description, r.hourly_rate, r.image, u.username
+    SELECT
+      r.id,
+      r.title,
+      r.description,
+      r.hourly_rate,
+      r.image,
+      u.username
     FROM requests r
     JOIN users u ON r.user_id = u.id
     WHERE r.type = 'job_listing'
@@ -250,131 +279,66 @@ router.get("/jobs/approved", (req, res) => {
   res.json(rows);
 });
 
-// Get all requests by the authenticated user
-router.get("/my", authenticateToken, (req, res) => {
-  const userId = req.user.id; // from authenticateToken middleware
-  const sql = `
-    SELECT id, type, title, description, hourly_rate, price, subcategory, status, image
-    FROM requests
-    WHERE user_id = ? AND is_deleted = 0
-    ORDER BY id DESC
-  `;
+// ==========================
+// ADMIN: VIEW ALL REQUESTS
+// ==========================
+router.get("/admin/all", authenticateToken, requireAdmin, (req, res) => {
+  const rows = db.prepare(`
+    SELECT
+      r.id,
+      r.user_id,
+      u.username,
+      r.type,
+      r.title,
+      r.description,
+      r.hourly_rate,
+      r.price,
+      r.subcategory,
+      r.status,
+      r.image,
+      r.parent_job_id
+    FROM requests r
+    JOIN users u ON r.user_id = u.id
+    WHERE r.is_deleted = 0
+    ORDER BY r.id DESC
+  `).all();
 
-  try {
-    const stmt = db.prepare(sql);
-    const requests = stmt.all(userId);
-    res.json(requests);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to fetch your posts" });
-  }
+  res.json(rows);
 });
 
-// Delete a request by id, only if owned by the user or admin
+// ==========================
+// USER: SOFT DELETE OWN REQUEST
+// ==========================
 router.delete("/:id", authenticateToken, (req, res) => {
-  const requestId = req.params.id;
-  const userId = req.user.id;
-  const isAdmin = req.user.isAdmin;
+  const result = db.prepare(`
+    UPDATE requests
+    SET is_deleted = 1
+    WHERE id = ? AND user_id = ?
+  `).run(req.params.id, req.user.id);
 
-  // First check if the request belongs to the user or if admin
-  try {
-    const selectStmt = db.prepare("SELECT user_id FROM requests WHERE id = ? AND is_deleted = 0");
-    const request = selectStmt.get(requestId);
-
-    if (!request) {
-      return res.status(404).json({ message: "Request not found" });
-    }
-
-    if (request.user_id !== userId && !isAdmin) {
-      return res.status(403).json({ message: "Unauthorized to delete this request" });
-    }
-
-    const deleteStmt = db.prepare("UPDATE requests SET is_deleted = 1 WHERE id = ?");
-    deleteStmt.run(requestId);
-
-    res.json({ message: "Request deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to delete request" });
+  if (result.changes === 0) {
+    return res.status(403).json({ message: "Not authorized or already deleted" });
   }
+
+  res.json({ message: "Request removed successfully" });
 });
 
-// --------------------------------------
-// GET /requests/all  (Admin only)
-// Return all job/store posts with username
-router.get("/all", authenticateToken, requireAdmin, (req, res) => {
-      const sql = `
-        SELECT r.id, r.user_id, u.username, r.type, r.title, r.description, r.hourly_rate, r.price, r.subcategory, r.status, r.image
-        FROM requests r
-        JOIN users u ON r.user_id = u.id
-        ORDER BY r.id DESC
-      `;
+// ==========================
+// ADMIN: SOFT DELETE ANY REQUEST
+// ==========================
+router.delete(
+  "/admin/:id",
+  authenticateToken,
+  requireAdmin,
+  (req, res) => {
+    db.prepare(`
+      UPDATE requests
+      SET is_deleted = 1
+      WHERE id = ?
+    `).run(req.params.id);
 
-      try {
-      const stmt = db.prepare(sql);
-      const rows = stmt.all(); // no callback, returns rows directly
-      res.json(rows);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to fetch requests" });
-    }
-
-    });
-
-    // Route to get ALL requests for admin dashboard
-    router.get("/admin/all", authenticateToken, requireAdmin, async (req, res) => {
-      try {
-          const stmt = db.prepare(`
-            SELECT requests.*, users.username
-            FROM requests
-            JOIN users ON requests.user_id = users.id
-            WHERE requests.is_deleted = 0;
-          `);
-          const requests = stmt.all();
-          res.json(requests);
-        } catch (error) {
-          console.error("Error fetching all requests for admin:", error);
-          res.status(500).json({ message: "Internal server error" });
-        }
-    });
-
-// --------------------------------------
-// DELETE /requests/admin/:id  (Admin only)
-// Delete any request by ID
-router.delete("/admin/:id", authenticateToken, requireAdmin, (req, res) => {
-  const id = req.params.id;
-
-  const sql = `DELETE FROM requests WHERE id = ?`;
-  db.run(sql, [id], function (err) {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Failed to delete request" });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ message: "Request not found" });
-    }
-    res.json({ message: "Request deleted successfully" });
-  });
-});
-
-// --------------------------------------
-// DELETE /requests/:id  (User only, own posts)
-// Delete request by ID if owned by current user
-router.delete("/:id", authenticateToken, (req, res) => {
-  const id = req.params.id;
-  const userId = req.user.id; // from your authenticateToken middleware
-
-  const sql = `DELETE FROM requests WHERE id = ? AND user_id = ?`;
-  db.run(sql, [id, userId], function (err) {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Failed to delete request" });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ message: "Request not found or not authorized" });
-    }
-    res.json({ message: "Request deleted successfully" });
-  });
-});
+    res.json({ message: "Request removed by admin" });
+  }
+);
 
 export default router;

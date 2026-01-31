@@ -2,103 +2,130 @@
 <html>
 <head>
   <title> EDEN </title>
-    <link rel = "stylesheet" href = "css/job_listings.css">
-    <link rel = "stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <meta name ="viewport" content = "width=device-width, initial-scale=1, user-scalable=no">
-	<noscript><link rel="stylesheet" href="css/noscript.css"></noscript>
+  <link rel="stylesheet" href="css/job_listings.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <noscript><link rel="stylesheet" href="css/noscript.css" /></noscript>
 </head>
 <body>
   <header>
-    <nav class = "navigation_bar">
-      <div class = "navigation">
-        <a href = "index.html"> Home </a>
-        <a href = "eventservices.html"> Event Services </a>
-        <a href = "job_listings.html" class = "active"> Job Listings </a>
-        <a href = "store.html"> Store </a>
-        <a href = "about.html"> About </a>
-        <a href = "login.html"> Login </a>
+    <nav class="navigation_bar">
+      <div class="navigation">
+        <a href="index.html"> Home </a>
+        <a href="eventservices.html"> Event Services </a>
+        <a href="job_listings.html" class="active"> Job Listings </a>
+        <a href="store.html"> Store </a>
+        <a href="about.html"> About </a>
+        <a href="login.html"> Login </a>
       </div>
-    </nav>  
+    </nav>
   </header>
 
-  <section class = "promo">
-    <h2 id = "text" class = "text"> Job Listings </h2>
-    <h3 id = "tagline" class = "tagline"> fix gardens. create paradise. </h3>
-      <video class = "video-bg" autoplay muted loop>
-        <source src="uploads/joblistings_promo.mp4" type="video/mp4">
-      </video>
+  <section class="promo">
+    <h2 id="text" class="text"> Job Listings </h2>
+    <h3 id="tagline" class="tagline"> fix gardens. create paradise. </h3>
+    <video class="video-bg" autoplay muted loop>
+      <source src="uploads/joblistings_promo.mp4" type="video/mp4" />
+    </video>
   </section>
 
-  <section class = "filler">
-  </section>
+  <section class="filler"></section>
 
   <div id="job-list"></div>
 
-  <!-- Modal for applying -->
-  <!-- Modal for application -->
-<div id="apply-modal" style="display:none;">
-  <div class="modal-content">
-    <span id="modal-close" style="cursor:pointer;">Close</span>
-    <h2>Apply for Job</h2>
-    <form id="apply-form" enctype="multipart/form-data">
-      <input type="hidden" id="job-id" name="request_id" />
-      <label>
-        Name:
-        <input type="text" name="applicant_name" required />
-      </label>
-      <label>
-        Email:
-        <input type="email" name="applicant_email" required />
-      </label>
-      <label>
-        Resume (PDF only):
-        <input type="file" name="resume" accept="application/pdf" required />
-      </label>
-      <button type="submit">Submit Application</button>
-    </form>
-  </div>
-</div>
+  <!-- Modal for applying or availing -->
+  <div id="apply-modal" style="display:none;">
+    <div class="modal-content">
+      <span id="modal-close" style="cursor:pointer;">Close</span>
 
-<section class = "filler">
-  </section>
+      <!-- Initial Choice -->
+      <div id="choice-view">
+        <h2>Choose an action</h2>
+        <button id="choose-apply-btn">Apply for Job</button>
+        <button id="choose-avail-btn">Avail as Service</button>
+      </div>
+
+      <!-- Application Form -->
+      <form id="apply-form" enctype="multipart/form-data" style="display:none;">
+        <input type="hidden" id="job-id" name="request_id" />
+        <label>
+          Name:
+          <input type="text" name="applicant_name" required />
+        </label>
+        <label>
+          Email:
+          <input type="email" name="applicant_email" required />
+        </label>
+        <label>
+          Resume (PDF only):
+          <input type="file" name="resume" accept="application/pdf" required />
+        </label>
+        <button type="submit">Submit Application</button>
+      </form>
+    </div>
+  </div>
+
+  <section class="filler"></section>
 
   <section id="footer">
-        <div class="main-footer">
-          <div class="logoinfo" data-aos="fade-up">
-            <h2>Welcome to Eden!</h2>
-            <p>Cultivating Paradise, One Garden at a Time</p>
-      
-            <div class="contact-details">
-              <h1>Contact Us</h1>
-              <li>
-                <div class="fa fa-phone"></div><a href="tel:+630987654321">+63 0987654321</a></li>
-              <li>
-                <div class="fa fa-envelope"></div><a href="mailto:eden@gmail.com">eden@gmail.com</a></li>
-              </li>
+    <div class="main-footer">
+      <div class="logoinfo" data-aos="fade-up">
+        <h2>Welcome to Eden!</h2>
+        <p>Cultivating Paradise, One Garden at a Time</p>
+
+        <div class="contact-details">
+          <h1>Contact Us</h1>
+          <li>
+            <div class="fa fa-phone"></div><a href="tel:+630987654321">+63 0987654321</a>
+          </li>
+          <li>
+            <div class="fa fa-envelope"></div><a href="mailto:eden@gmail.com">eden@gmail.com</a>
+          </li>
+        </div>
+      </div>
+      <div class="com" data-aos="fade-up">
+        <h1>Eden</h1>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="eventservices.html">Event Services</a></li>
+          <li><a href="job_listings.html">Job Listings</a></li>
+          <li><a href="store.html">Store</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </div>
+      <div class="info" data-aos="fade-up">
+        <h1>Social Media</h1>
+        <div class="sociallogos">
+          <div class="logobox">
+            <a
+              href="https://www.tiktok.com/@edengarden2025?_t=ZS-8v557sJxLam&_r=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><img src="uploads/tiktok.png" style="width:40px;height:40px;" />
+            </a>
+            <a
+              href="https://www.instagram.com/edenparadisegarden?igsh=d3dxeDFyMjZ6MGIx&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><img src="uploads/instagram.png" style="width:40px;height:40px;" />
+            </a>
+            <a
+              href="https://www.facebook.com/share/1BvDCAfEMm/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><img src="uploads/facebook.png" style="width:40px;height:40px;" />
+            </a>
           </div>
         </div>
-        <div class="com " data-aos="fade-up">
-          <h1>Eden</h1>
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="eventservices.html">Event Services</a></li>
-            <li><a href="job_listings.html">Job Listings</a></li>
-            <li><a href="store.html">Store</a></li>
-            <li><a href="about.html">About</a></li>
-          </ul>
-        </div>
-        <div class="info" data-aos="fade-up">
-          <h1>Social Media</h1>
-          <div class="sociallogos">
-            <div class="logobox">
-              <a href="https://www.tiktok.com/@edengarden2025?_t=ZS-8v557sJxLam&_r=1" target="_blank" rel="noopener noreferrer"><img src="uploads/tiktok.png" style="width:40px;height:40px;"></a>
-              <a href="https://www.instagram.com/edenparadisegarden?igsh=d3dxeDFyMjZ6MGIx&utm_source=qr" target="_blank" rel="noopener noreferrer"><img src="uploads/instagram.png" style="width:40px;height:40px;"></a>
-              <a href="https://www.facebook.com/share/1BvDCAfEMm/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"><img src="uploads/facebook.png"style="width:40px;height:40px;"></a>
-            </div>
-          </div>
-        </div>
-        </div>
-      <footer>Copyright © 2025 Eden. All Rights Reserved.</footer>
+      </div>
+    </div>
+    <footer>Copyright © 2025 Eden. All Rights Reserved.</footer>
   </section>
 
   <script src="js/job_listings.js"></script>
