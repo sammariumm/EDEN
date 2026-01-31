@@ -38,7 +38,6 @@ function validateRequestInput(type, body) {
     );
   }
 
-  // ✅ service_avail MUST reference a job
   if (type === "service_avail") {
     const { title, description, parent_job_id } = body;
     return (
@@ -78,7 +77,6 @@ router.get("/my", authenticateToken, (req, res) => {
   res.json(rows);
 });
 
-
 // ==========================
 // USER: CREATE REQUEST
 // ==========================
@@ -116,9 +114,7 @@ router.post(
       return res.status(400).json({ message: "Invalid request data" });
     }
 
-    // --------------------------
     // SERVICE AVAIL GUARDS
-    // --------------------------
     if (type === "service_avail") {
       const job = db.prepare(`
         SELECT id, user_id
@@ -223,10 +219,10 @@ router.post("/:id/reject", authenticateToken, requireAdmin, (req, res) => {
 });
 
 // ==========================
-// STORE: GET APPROVED ITEMS
+// STORE: GET APPROVED ITEMS WITH SEARCH
 // ==========================
 router.get("/approved", (req, res) => {
-  const { subcategory } = req.query;
+  const { subcategory, search } = req.query;
   const validSubs = [
     "tools",
     "decoration",
@@ -253,15 +249,23 @@ router.get("/approved", (req, res) => {
     params.push(subcategory);
   }
 
+  if (search && search.trim() !== "") {
+    const trimmedSearch = `%${search.trim().toLowerCase()}%`;
+    query += " AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)";
+    params.push(trimmedSearch, trimmedSearch);
+  }
+
   const items = db.prepare(query).all(...params);
   res.json(items);
 });
 
 // ==========================
-// JOBS: GET APPROVED LISTINGS
+// JOBS: GET APPROVED LISTINGS WITH SEARCH
 // ==========================
 router.get("/jobs/approved", (req, res) => {
-  const rows = db.prepare(`
+  const { search } = req.query;
+
+  let query = `
     SELECT
       r.id,
       r.title,
@@ -274,8 +278,17 @@ router.get("/jobs/approved", (req, res) => {
     WHERE r.type = 'job_listing'
       AND r.status = 'approved'
       AND r.is_deleted = 0
-  `).all();
+  `;
 
+  const params = [];
+
+  if (search && search.trim() !== "") {
+    const trimmedSearch = `%${search.trim().toLowerCase()}%`;
+    query += " AND (LOWER(r.title) LIKE ? OR LOWER(r.description) LIKE ?)";
+    params.push(trimmedSearch, trimmedSearch);
+  }
+
+  const rows = db.prepare(query).all(...params);
   res.json(rows);
 });
 

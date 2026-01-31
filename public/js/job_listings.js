@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const jobSearchInput = document.getElementById("job-search");
+
   loadJobs();
 
   const modal = document.getElementById("apply-modal");
@@ -105,10 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Load job listings
-  async function loadJobs() {
+  // Load job listings, now with search support
+  async function loadJobs(searchTerm = "") {
     try {
-      const res = await fetch("/requests/jobs/approved");
+      let url = "/requests/jobs/approved";
+      if (searchTerm.trim()) {
+        url += `?search=${encodeURIComponent(searchTerm.trim())}`;
+      }
+
+      const res = await fetch(url);
 
       if (!res.ok) {
         throw new Error("Failed to fetch jobs");
@@ -146,4 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
     }
   }
+
+  // Search input event listener
+  jobSearchInput.addEventListener("input", () => {
+    loadJobs(jobSearchInput.value);
+  });
 });

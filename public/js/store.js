@@ -3,19 +3,30 @@ import { addToCart, getCartItemCount } from "./cartUtils.js";
 document.addEventListener("DOMContentLoaded", () => {
   const storeContainer = document.getElementById("store-items");
   const subcategorySelect = document.getElementById("subcategory-filter");
+  const storeSearchInput = document.getElementById("store-search");
 
   updateCartCount();
   loadStoreItems();
 
-  subcategorySelect.addEventListener("change", () => {
-    loadStoreItems(subcategorySelect.value);
-  });
+  function reloadStore() {
+    loadStoreItems(subcategorySelect.value, storeSearchInput.value);
+  }
 
-  async function loadStoreItems(subcategory = "all") {
+  subcategorySelect.addEventListener("change", reloadStore);
+  storeSearchInput.addEventListener("input", reloadStore);
+
+  async function loadStoreItems(subcategory = "all", searchTerm = "") {
     try {
       let url = "/requests/approved";
+      const params = [];
       if (subcategory !== "all") {
-        url += `?subcategory=${encodeURIComponent(subcategory)}`;
+        params.push(`subcategory=${encodeURIComponent(subcategory)}`);
+      }
+      if (searchTerm.trim()) {
+        params.push(`search=${encodeURIComponent(searchTerm.trim())}`);
+      }
+      if (params.length > 0) {
+        url += "?" + params.join("&");
       }
 
       const res = await fetch(url);
