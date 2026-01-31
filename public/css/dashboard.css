@@ -1,0 +1,33 @@
+/* ===== MODAL OVERLAY ===== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgba(0, 0, 0, 0.6);
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+}
+
+/* ===== MODAL CONTENT ===== */
+.modal-content {
+  background: #ffffff;
+  padding: 20px;
+  width: 420px;
+  max-width: 90%;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Close button */
+.close {
+  float: right;
+  font-size: 22px;
+  cursor: pointer;
+}

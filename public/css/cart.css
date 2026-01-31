@@ -1,0 +1,305 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* prevent horizontal scroll */
+}
+
+body {
+    font-family: "Century Gothic", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f9f9f9;
+    /*overflow-x: hidden;*/
+}
+
+/* NAVIGATION */
+.navigation_bar 
+{
+    overflow: hidden;
+    font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
+    width: 100%;
+    top: 0px;
+}
+
+header
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 200px); /* account for padding */
+    padding: 30px 100px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 100;
+}
+
+.navigation
+{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.navigation a
+{
+    float: left;
+    color: #FEFAE0;
+    text-align: center;
+    text-decoration: none;
+    margin-right: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.navigation a:hover, 
+.navigation a.active
+{
+    color: #FEFAE0;
+    background: #505B39;
+    border-radius: 25px;
+    transition: box-shadow 0.2s;
+}
+
+.navigation a:hover
+{
+    opacity: 0.8;
+    box-shadow: 0px 5px 10px rgba(165, 156, 156, 0.8);
+}
+
+.content-section {
+  margin-top: 250px;
+}
+
+/* CART CONTAINER: Two-column layout */
+.container {
+    background: rgba(255, 255, 255, 0.40);   /* 75% opaque white → quite see-through */
+    /* or try these opacity levels: */
+    /* background: rgba(255, 255, 255, 0.90);  ← subtle */
+    /* background: rgba(255, 255, 255, 0.60);  ← more transparent */
+    /* background: rgba(255, 255, 255, 0.40);  ← very ghostly */
+    
+    backdrop-filter: blur(8px);          /* blurs what's behind → modern glass effect */
+    -webkit-backdrop-filter: blur(8px);  /* Safari support */
+    
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.25);  /* subtle edge highlight */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+    z-index: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 150px auto 50px;
+    padding: 20px;
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    box-sizing: border-box;             /* or #f9f9f9 to match body bg */
+    border-radius: 12px;                /* wraps everything nicely */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+}
+
+/* Left column: items */
+.cart-left {
+    flex: 2; /* take up 2/3 of space */
+    background: #FEFAE0;          /* or #FEFAE0 to match the creamy subtotal/payment boxes */
+    padding: 20px;              /* matches right side's padding for symmetry */
+    border-radius: 12px;        /* matches right side */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);  /* matches right side */
+}
+
+/* Right column: summary & payment */
+.cart-right {
+    background: #FEFAE0;
+    position: relative; /* add this */
+    z-index: 2; /* ensure it sits above the video overlay */
+    flex: 1; /* take up 1/3 of space */
+    background: #505B39;
+    padding: 20px;
+    border-radius: 12px;
+    height: fit-content; /* adapt to content */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* Make totals and payment stand out */
+.cart-total, .payment-form {
+    background: #FEFAE0;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Add hover effect on checkout */
+#checkout-btn:hover {
+    background: #2F80ED;
+}
+
+.section-header {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+/* CART ROWS */
+.cart-row {
+    display: flex;
+    align-items: center;
+}
+
+.cart-column {
+    padding: 10px;
+}
+
+.cart-item {
+    width: 45%;
+}
+
+.cart-price {
+    width: 20%;
+    font-size: 1.1em;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+
+.cart-header {
+    font-weight: bold;
+    border-bottom: 2px solid #333;
+}
+
+/* EDEN ITEM ROW STYLE */
+.cart-row img {
+    width: 75px;
+    border-radius: 8px;
+}
+
+.cart-row input[type="number"] {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+}
+
+/* REMOVE BUTTON */
+.remove-btn {
+    background: #EB5757;
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.remove-btn:hover {
+    background: #CC4C4C;
+}
+
+/* TOTAL */
+.cart-total {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.cart-total-title {
+    font-size: 1.5em;
+}
+
+/* PAYMENT FORM */
+.payment-form {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.payment-form input {
+    padding: 10px;
+    font-size: 1em;
+}
+
+.payment-row {
+    display: flex;
+    gap: 10px;
+}
+
+#checkout-btn {
+    /* Size & padding – keeps roughly the same footprint as your original */
+    padding: 12px 100px;           /* top/bottom = original 12px, left/right = 60px like add-to-cart */
+    margin: 15px auto 15px;       /* centered + good spacing (adjust margin-top if needed) */
+
+    /* Shape & border */
+    border: none;
+    border-radius: 20px;          /* matches add-to-cart-btn */
+
+    /* Colors – matching your add-to-cart style */
+    background-color: #798645;
+    color: #d9e2a9;
+
+    /* Text */
+    font-size: 1.2em;             /* ← kept exactly as your original checkout button */
+    font-weight: bold;
+    text-align: center;
+
+    /* Behavior */
+    cursor: pointer;
+    transition: box-shadow 0.2s, opacity 0.2s;  /* smooth like add-to-cart */
+    display: block;               /* helps centering */
+    width: fit-content;           /* sizes naturally to content + padding */
+}
+
+/* Hover – identical to add-to-cart-btn */
+#checkout-btn:hover {
+    opacity: 0.8;
+    box-shadow: 0px 5px 10px rgba(165, 156, 156, 0.8);
+}
+
+/* Disabled state – styled in the same family */
+#checkout-btn:disabled {
+    background-color: #a0a97a;    /* muted/lighter version of #798645 */
+    color: #c8d29a;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Video */
+.promo {
+    position: fixed; /* so video stays behind everything */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1; /* behind everything */
+}
+
+.video-bg {
+position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover; /* makes sure it fills screen */
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4); /* dim level */
+    z-index: 1; /* ← fixed: now above video but still inside .promo (behind content) */
+}
