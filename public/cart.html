@@ -2,93 +2,84 @@
 <html>
 <head>
   <title>Shopping Cart</title>
-  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/cart.css">
 </head>
+
+
 <body>
-  <nav>
-    <div class = "navigation">
-        <a href = "index.html"> Home </a>
-        <a href = "eventservices.html"> Event Services </a>
-        <a href = "job_listings.html"> Job Listings </a>
-        <a href = "store.html"> Store </a>
-        <a href = "about.html" class = "active"> About </a>
-        <a href = "login.html"> Login </a>
-        <a href="store.html">Back to Store</a>
+
+  <!-- NAVIGATION (kept EDEN structure) -->
+<header>
+  <nav class="navigation_bar">
+    <div class="navigation">
+      <a href="index.html"> Home </a>
+      <a href="eventservices.html"> Event Services </a>
+      <a href="job_listings.html"> Job Listings </a>
+      <a href="store.html"> Store </a>
+      <a href="about.html"> About </a>
+      <a href="login.html"> Login </a>
+      <a href="cart.html" id="cart-link" style="position: relative;" class="active">
+        <img src="uploads/cart.png" style="height: 40px;">
+        <span id="cart-count" class="cart-badge">0</span>
+      </a>
     </div>
-  </nav>
+  </nav>  
+</header>
+  <section class = "promo">
+            <video class = "video-bg" autoplay muted loop>
+                <source src="uploads/store_promo.mp4" type="video/mp4">
+            </video>
+            <div class="video-overlay"></div>
+      </section>
+  <section class="container content-section">
+    <!-- LEFT COLUMN: Cart Items -->
+    <div class="cart-left">
+        <h2 class="section-header">Your Cart</h2>
 
-  <h1>Your Cart</h1>
-  <div id="cart-items"></div>
+        <!-- TABLE HEADER -->
+        <div class="cart-row cart-header-row">
+          <span class="cart-item cart-header cart-column">ITEM</span>
+          <span class="cart-price cart-header cart-column">PRICE</span>
+          <span class="cart-quantity cart-header cart-column">QUANTITY</span>
+        </div>
 
-  <div id="cart-summary">
-    <p>Subtotal: <span id="subtotal">0.00</span></p>
-    <p>Tax (12%): <span id="tax">0.00</span></p>
-    <p>Total: <span id="total">0.00</span></p>
-  </div>
-  <!--  gawing popup --> 
-  <form id="payment-form"> 
-    <h2>Payment Details</h2>
+        <!-- EDEN JS TARGET -->
+        <div id="cart-items"></div>
 
-    <div class="payment-group">
-      <label for="email">Email Address</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        required
-        placeholder="user@example.com"
-      />
-    </div>
-    <div class="payment-group">
-      <label for="card-name">Cardholder Name</label>
-      <input
-        type="text"
-        id="card-name"
-        required
-        placeholder="Juan Dela Cruz"
-      />
+        <p id="empty-cart-message" style="display:none;">Your cart is empty.</p>
     </div>
 
-    <div class="payment-group">
-      <label for="card-number">Card Number</label>
-      <input
-        type="text"
-        id="card-number"
-        required
-        maxlength="19"
-        placeholder="1234 5678 9012 3456"
-      />
+    <!-- RIGHT COLUMN: Summary & Payment -->
+    <div class="cart-right">
+        <div id="cart-summary" class="cart-total">
+            <p><strong>Subtotal:</strong> <span id="subtotal">₱0.00</span></p>
+            <p><strong>Tax (12%):</strong> <span id="tax">₱0.00</span></p>
+            <p class="cart-total-title">
+                <strong>Total:</strong>
+                <span id="total">₱0.00</span>
+            </p>
+        </div>
+
+        <form id="payment-form" class="payment-form">
+            <h3>Payment Details</h3>
+
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="text" id="card-name" placeholder="Cardholder Name" required>
+            <input type="text" id="card-number" placeholder="Card Number" required>
+
+            <div class="payment-row">
+                <input type="month" id="expiry" required>
+                <input type="password" id="cvv" placeholder="CVV" required>
+            </div>
+
+            <button id="checkout-btn" type="submit" disabled>
+                CHECKOUT
+            </button>
+        </form>
     </div>
-
-    <div class="payment-row">
-      <div class="payment-group">
-        <label for="expiry">Expiry Date</label>
-        <input
-          type="month"
-          id="expiry"
-          required
-        />
-      </div>
-
-      <div class="payment-group">
-        <label for="cvv">CVV</label>
-        <input
-          type="password"
-          id="cvv"
-          required
-          maxlength="4"
-          placeholder="123"
-        />
-      </div>
-    </div>
-
-    <button id="checkout-btn" type="submit" disabled>
-      Checkout
-    </button>
-  </form>
-
-  <p id="empty-cart-message" style="display:none;">Your cart is empty.</p>
+  </section>
 
   <script type="module" src="js/cart.js"></script>
 </body>
 </html>
+
