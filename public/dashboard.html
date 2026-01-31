@@ -1,136 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css" />
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css" />
 </head>
 <body>
-    <nav>
-        <div class="navigation">
-            <a href="index.html">Home</a>
-            <a href="eventservices.html">Event Services</a>
-            <a href="job_listings.html">Job Listings</a>
-            <a href="store.html">Store</a>
-            <a href="about.html" class="active">About</a>
-            <a href="login.html">Login</a>
-        </div>
-    </nav>
 
-    <h1 id="welcome"></h1>
+  <!-- NAV -->
+  <nav>
+    <div class="navigation">
+      <a href="index.html">Home</a>
+      <a href="eventservices.html">Event Services</a>
+      <a href="job_listings.html">Job Listings</a>
+      <a href="store.html">Store</a>
+      <a href="about.html">About</a>
+      <a href="login.html">Login</a>
+    </div>
+  </nav>
 
-    <!-- Logout button -->
-    <button id="logoutBtn">Logout</button>
+  <h1 id="welcome"></h1>
+  <button id="logoutBtn">Logout</button>
 
-    <!-- USER DASHBOARD -->
-    <section id="userDashboard" style="display:none;">
-        <h2>User Dashboard</h2>
+  <!-- ==========================
+       USER DASHBOARD
+  ========================== -->
+  <section id="userDashboard" style="display:none;">
+    <h2>User Dashboard</h2>
 
-        <h3>Request Job Listing</h3>
-        <form id="jobRequestForm">
-            <input type="text" id="jobTitle" placeholder="Title" required />
-            <textarea id="jobDescription" placeholder="Description" required></textarea>
-            <input type="number" id="hourlyRate" placeholder="Hourly Rate" step="0.01" required />
-            <input type="file" id="jobImage" accept="image/*" />
-            <button type="submit">Submit Job Request</button>
-        </form>
+    <!-- JOB REQUEST -->
+    <h3>Request Job Listing</h3>
+    <form id="jobRequestForm" enctype="multipart/form-data">
+      <input type="hidden" id="jobRequestId" />
 
-        <h3>Request Store Posting</h3>
-        <form id="storeRequestForm">
-            <input type="text" id="storeTitle" placeholder="Title" required />
-            <textarea id="storeDescription" placeholder="Description" required></textarea>
-            <input type="number" id="price" placeholder="Price" step="0.01" required />
-            <select id="storeSubcategory" required>
-                <option value="" disabled selected>Select Category</option>
-                <option value="tools">Tools</option>
-                <option value="decoration">Decoration</option>
-                <option value="plants">Plants</option>
-                <option value="flowers">Flowers</option>
-                <option value="miscellaneous">Miscellaneous</option>
-            </select>
-            <input type="file" id="storeImage" accept="image/*" />
-            <button type="submit">Submit Store Request</button>
-        </form>
+      <input type="text" id="jobTitle" placeholder="Title" required />
+      <textarea id="jobDescription" placeholder="Description" required></textarea>
+      <input type="number" id="hourlyRate" placeholder="Hourly Rate" step="0.01" required />
+      <input type="file" id="jobImage" accept="image/*" />
 
-        <h3>Your Requests</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Title</th>
-                    <th>Details</th>
-                    <th>Status</th>
-                    <th>Image</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="userRequests"></tbody>
-        </table>
+      <button type="submit" id="jobSubmitBtn">Submit Job Request</button>
+      <button type="button" id="jobCancelEditBtn" style="display:none;">Cancel Edit</button>
+    </form>
 
-        <h3>Applications to Your Job Listings</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Job Title</th>
-                    <th>Applicant Name</th>
-                    <th>Applicant Email</th>
-                    <th>Submitted At</th>
-                    <th>Resume</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="userApplications"></tbody>
-        </table>
-    </section>
+    <!-- STORE REQUEST -->
+    <h3>Request Store Posting</h3>
+    <form id="storeRequestForm" enctype="multipart/form-data">
+      <input type="hidden" id="storeRequestId" />
 
-    <!-- ADMIN DASHBOARD -->
-    <section id="adminDashboard" style="display:none;">
-        <h2>Admin Dashboard</h2>
+      <input type="text" id="storeTitle" placeholder="Title" required />
+      <textarea id="storeDescription" placeholder="Description" required></textarea>
+      <input type="number" id="price" placeholder="Price" step="0.01" required />
 
-        <h3>Pending Requests</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Type</th>
-                    <th>Details</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="adminRequests"></tbody>
-        </table>
+      <select id="storeSubcategory" required>
+        <option value="" disabled selected>Select Category</option>
+        <option value="tools">Tools</option>
+        <option value="decoration">Decoration</option>
+        <option value="plants">Plants</option>
+        <option value="flowers">Flowers</option>
+        <option value="miscellaneous">Miscellaneous</option>
+      </select>
 
-        <h3>Applications to Your Job Listings</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Job Title</th>
-                    <th>Applicant Name</th>
-                    <th>Applicant Email</th>
-                    <th>Submitted At</th>
-                    <th>Resume</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="adminApplications"></tbody>
-        </table>
+      <input type="file" id="storeImage" accept="image/*" />
 
-        <h3>All Posts</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Type</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="adminAllPosts"></tbody>
-        </table>
-    </section>
+      <button type="submit" id="storeSubmitBtn">Submit Store Request</button>
+      <button type="button" id="storeCancelEditBtn" style="display:none;">Cancel Edit</button>
+    </form>
 
-    <!-- Load your dashboard script -->
-    <script src="js/dashboard.js" defer></script>
+    <!-- USER REQUESTS -->
+    <h3>Your Requests</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Title</th>
+          <th>Details</th>
+          <th>Status</th>
+          <th>Image</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="userRequests"></tbody>
+    </table>
+
+    <!-- USER APPLICATIONS -->
+    <h3>Applications to Your Job Listings</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Applicant Name</th>
+          <th>Applicant Email</th>
+          <th>Submitted At</th>
+          <th>Resume</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="userApplications"></tbody>
+    </table>
+  </section>
+
+  <!-- ==========================
+       ADMIN DASHBOARD
+  ========================== -->
+  <section id="adminDashboard" style="display:none;">
+    <h2>Admin Dashboard</h2>
+
+    <!-- PENDING REQUESTS -->
+    <h3>Pending Requests</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Type</th>
+          <th>Details</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="adminRequests"></tbody>
+    </table>
+
+    <!-- ADMIN APPLICATIONS -->
+    <h3>Applications to Your Job Listings</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Applicant Name</th>
+          <th>Applicant Email</th>
+          <th>Submitted At</th>
+          <th>Resume</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="adminApplications"></tbody>
+    </table>
+
+    <!-- ALL POSTS -->
+    <h3>All Posts</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Type</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="adminAllPosts"></tbody>
+    </table>
+  </section>
+
+  <!-- ADMIN EDIT MODAL -->
+<div id="adminEditModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeAdminEdit()">&times;</span>
+
+    <h3>Edit Post</h3>
+
+    <form id="adminEditForm">
+      <input type="hidden" id="adminEditId" />
+
+      <input type="text" id="adminEditTitle" placeholder="Title" required />
+      <textarea id="adminEditDescription" placeholder="Description" required></textarea>
+
+      <!-- Job listing -->
+      <input
+        type="number"
+        id="adminEditHourlyRate"
+        placeholder="Hourly Rate"
+        step="0.01"
+        style="display:none;"
+      />
+
+      <!-- Store -->
+      <input
+        type="number"
+        id="adminEditPrice"
+        placeholder="Price"
+        step="0.01"
+        style="display:none;"
+      />
+
+      <select id="adminEditSubcategory" style="display:none;">
+        <option value="">Select category</option>
+        <option value="tools">Tools</option>
+        <option value="decoration">Decoration</option>
+        <option value="plants">Plants</option>
+        <option value="flowers">Flowers</option>
+        <option value="miscellaneous">Miscellaneous</option>
+      </select>
+
+      <input type="file" id="adminEditImage" accept="image/*" />
+
+      <div class="modal-actions">
+        <button type="submit">Save Changes</button>
+        <button type="button" onclick="closeAdminEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- SCRIPT -->
+  <script src="js/dashboard.js" defer></script>
+
 </body>
 </html>

@@ -114,7 +114,6 @@ router.post(
       return res.status(400).json({ message: "Invalid request data" });
     }
 
-    // SERVICE AVAIL GUARDS
     if (type === "service_avail") {
       const job = db.prepare(`
         SELECT id, user_id
@@ -130,9 +129,7 @@ router.post(
       }
 
       if (job.user_id === req.user.id) {
-        return res.status(403).json({
-          message: "You cannot avail your own job"
-        });
+        return res.status(403).json({ message: "You cannot avail your own job" });
       }
     }
 
@@ -170,127 +167,159 @@ router.post(
 );
 
 // ==========================
-// ADMIN: VIEW PENDING REQUESTS
+// USER: UPDATE OWN REQUEST
 // ==========================
-router.get("/pending", authenticateToken, requireAdmin, (req, res) => {
-  const rows = db.prepare(`
-    SELECT
-      r.id,
-      u.username,
-      r.type,
-      r.title,
-      r.description,
-      r.hourly_rate,
-      r.price,
-      r.subcategory,
-      r.image,
-      r.parent_job_id
-    FROM requests r
-    JOIN users u ON r.user_id = u.id
-    WHERE r.status = 'pending'
-      AND r.is_deleted = 0
-    ORDER BY r.id DESC
-  `).all();
+router.put(
+  "/:id",
+  authenticateToken,
+  upload.single("image"),
+  (req, res) => {
+    const id = req.params.id;
 
-  res.json(rows);
-});
+    const existing = db.prepare(`
+      SELECT * FROM requests
+      WHERE id = ? AND is_deleted = 0
+    `).get(id);
 
-// ==========================
-// ADMIN: APPROVE / REJECT
-// ==========================
-router.post("/:id/approve", authenticateToken, requireAdmin, (req, res) => {
-  db.prepare(`
-    UPDATE requests
-    SET status = 'approved'
-    WHERE id = ? AND is_deleted = 0
-  `).run(req.params.id);
-
-  res.json({ message: "Request approved" });
-});
-
-router.post("/:id/reject", authenticateToken, requireAdmin, (req, res) => {
-  db.prepare(`
-    UPDATE requests
-    SET status = 'rejected'
-    WHERE id = ? AND is_deleted = 0
-  `).run(req.params.id);
-
-  res.json({ message: "Request rejected" });
-});
-
-// ==========================
-// STORE: GET APPROVED ITEMS WITH SEARCH
-// ==========================
-router.get("/approved", (req, res) => {
-  const { subcategory, search } = req.query;
-  const validSubs = [
-    "tools",
-    "decoration",
-    "plants",
-    "flowers",
-    "miscellaneous"
-  ];
-
-  let query = `
-    SELECT *
-    FROM requests
-    WHERE status = 'approved'
-      AND type = 'store'
-      AND is_deleted = 0
-  `;
-
-  const params = [];
-
-  if (subcategory) {
-    if (!validSubs.includes(subcategory)) {
-      return res.status(400).json({ message: "Invalid subcategory" });
+    if (!existing) {
+      return res.status(404).json({ message: "Request not found" });
     }
-    query += " AND subcategory = ?";
-    params.push(subcategory);
-  }
 
-  if (search && search.trim() !== "") {
-    const trimmedSearch = `%${search.trim().toLowerCase()}%`;
-    query += " AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)";
-    params.push(trimmedSearch, trimmedSearch);
-  }
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
 
-  const items = db.prepare(query).all(...params);
-  res.json(items);
-});
+    const {
+      title,
+      description,
+      hourly_rate,
+      price,
+      subcategory,
+      parent_job_id
+    } = req.body;
+
+    const parsedHourlyRate = hourly_rate !== undefined ? Number(hourly_rate) : null;
+    const parsedPrice = price !== undefined ? Number(price) : null;
+
+    const bodyForValidation = {
+      type: existing.type,
+      title,
+      description,
+      hourly_rate: parsedHourlyRate,
+      price: parsedPrice,
+      subcategory,
+      parent_job_id
+    };
+
+    if (!validateRequestInput(existing.type, bodyForValidation)) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : existing.image;
+
+    db.prepare(`
+      UPDATE requests SET
+        title = ?,
+        description = ?,
+        hourly_rate = ?,
+        price = ?,
+        subcategory = ?,
+        image = ?,
+        parent_job_id = ?
+      WHERE id = ?
+    `).run(
+      title,
+      description,
+      existing.type === "job_listing" ? parsedHourlyRate : null,
+      existing.type === "store" ? parsedPrice : null,
+      existing.type === "store" ? subcategory : null,
+      imagePath,
+      existing.type === "service_avail" ? Number(parent_job_id) : null,
+      id
+    );
+
+    res.json({ message: "Request updated successfully" });
+  }
+);
 
 // ==========================
-// JOBS: GET APPROVED LISTINGS WITH SEARCH
+// ADMIN: UPDATE ANY REQUEST
 // ==========================
-router.get("/jobs/approved", (req, res) => {
-  const { search } = req.query;
+router.put(
+  "/admin/:id",
+  authenticateToken,
+  requireAdmin,
+  upload.single("image"),
+  (req, res) => {
+    const id = req.params.id;
 
-  let query = `
-    SELECT
-      r.id,
-      r.title,
-      r.description,
-      r.hourly_rate,
-      r.image,
-      u.username
-    FROM requests r
-    JOIN users u ON r.user_id = u.id
-    WHERE r.type = 'job_listing'
-      AND r.status = 'approved'
-      AND r.is_deleted = 0
-  `;
+    const existing = db.prepare(`
+      SELECT * FROM requests
+      WHERE id = ? AND is_deleted = 0
+    `).get(id);
 
-  const params = [];
+    if (!existing) {
+      return res.status(404).json({ message: "Request not found" });
+    }
 
-  if (search && search.trim() !== "") {
-    const trimmedSearch = `%${search.trim().toLowerCase()}%`;
-    query += " AND (LOWER(r.title) LIKE ? OR LOWER(r.description) LIKE ?)";
-    params.push(trimmedSearch, trimmedSearch);
+    const {
+      title,
+      description,
+      hourly_rate,
+      price,
+      subcategory,
+      parent_job_id
+    } = req.body;
+
+    const parsedHourlyRate = hourly_rate !== undefined ? Number(hourly_rate) : null;
+    const parsedPrice = price !== undefined ? Number(price) : null;
+
+    const bodyForValidation = {
+      type: existing.type,
+      title,
+      description,
+      hourly_rate: parsedHourlyRate,
+      price: parsedPrice,
+      subcategory,
+      parent_job_id
+    };
+
+    if (!validateRequestInput(existing.type, bodyForValidation)) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : existing.image;
+
+    db.prepare(`
+      UPDATE requests SET
+        title = ?,
+        description = ?,
+        hourly_rate = ?,
+        price = ?,
+        subcategory = ?,
+        image = ?,
+        parent_job_id = ?,
+        status = 'pending'
+      WHERE id = ?
+    `).run(
+      title,
+      description,
+      existing.type === "job_listing" ? parsedHourlyRate : null,
+      existing.type === "store" ? parsedPrice : null,
+      existing.type === "store" ? subcategory : null,
+      imagePath,
+      existing.type === "service_avail" ? Number(parent_job_id) : null,
+      id
+    );
+
+    res.json({ message: "Request updated by admin (set to pending)" });
   }
+);
 
-  const rows = db.prepare(query).all(...params);
-  res.json(rows);
-});
+// ==========================
+// ADMIN / STORE / JOB FETCH & DELETE ROUTES
+// (unchanged from your original file)
+// ==========================
 
 // ==========================
 // ADMIN: VIEW ALL REQUESTS
@@ -319,6 +348,108 @@ router.get("/admin/all", authenticateToken, requireAdmin, (req, res) => {
   res.json(rows);
 });
 
+
+// ==========================
+// ADMIN: VIEW PENDING REQUESTS
+// ==========================
+router.get("/pending", authenticateToken, requireAdmin, (req, res) => {
+  const rows = db.prepare(`
+    SELECT
+      r.id,
+      u.username,
+      r.type,
+      r.title,
+      r.description,
+      r.hourly_rate,
+      r.price,
+      r.subcategory,
+      r.image
+    FROM requests r
+    JOIN users u ON r.user_id = u.id
+    WHERE r.status = 'pending'
+      AND r.is_deleted = 0
+    ORDER BY r.id DESC
+  `).all();
+
+  res.json(rows);
+});
+
+// ==========================
+// STORE: GET APPROVED ITEMS
+// ==========================
+router.get("/approved", (req, res) => {
+  const { subcategory, search } = req.query;
+
+  const validSubs = [
+    "tools",
+    "decoration",
+    "plants",
+    "flowers",
+    "miscellaneous"
+  ];
+
+  let query = `
+    SELECT *
+    FROM requests
+    WHERE type = 'store'
+      AND status = 'approved'
+      AND is_deleted = 0
+  `;
+
+  const params = [];
+
+  if (subcategory) {
+    if (!validSubs.includes(subcategory)) {
+      return res.status(400).json({ message: "Invalid subcategory" });
+    }
+    query += " AND subcategory = ?";
+    params.push(subcategory);
+  }
+
+  if (search && search.trim()) {
+    const q = `%${search.trim().toLowerCase()}%`;
+    query += " AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)";
+    params.push(q, q);
+  }
+
+  const items = db.prepare(query).all(...params);
+  res.json(items);
+});
+
+// ==========================
+// JOBS: GET APPROVED LISTINGS
+// ==========================
+router.get("/jobs/approved", (req, res) => {
+  const { search } = req.query;
+
+  let query = `
+    SELECT
+      r.id,
+      r.title,
+      r.description,
+      r.hourly_rate,
+      r.image,
+      u.username
+    FROM requests r
+    JOIN users u ON r.user_id = u.id
+    WHERE r.type = 'job_listing'
+      AND r.status = 'approved'
+      AND r.is_deleted = 0
+  `;
+
+  const params = [];
+
+  if (search && search.trim()) {
+    const q = `%${search.trim().toLowerCase()}%`;
+    query += " AND (LOWER(r.title) LIKE ? OR LOWER(r.description) LIKE ?)";
+    params.push(q, q);
+  }
+
+  const rows = db.prepare(query).all(...params);
+  res.json(rows);
+});
+
+
 // ==========================
 // USER: SOFT DELETE OWN REQUEST
 // ==========================
@@ -326,14 +457,18 @@ router.delete("/:id", authenticateToken, (req, res) => {
   const result = db.prepare(`
     UPDATE requests
     SET is_deleted = 1
-    WHERE id = ? AND user_id = ?
+    WHERE id = ?
+      AND user_id = ?
+      AND is_deleted = 0
   `).run(req.params.id, req.user.id);
 
   if (result.changes === 0) {
-    return res.status(403).json({ message: "Not authorized or already deleted" });
+    return res.status(403).json({
+      message: "Not authorized or already deleted"
+    });
   }
 
-  res.json({ message: "Request removed successfully" });
+  res.json({ message: "Request deleted successfully" });
 });
 
 // ==========================
@@ -350,8 +485,69 @@ router.delete(
       WHERE id = ?
     `).run(req.params.id);
 
-    res.json({ message: "Request removed by admin" });
+    res.json({ message: "Request deleted by admin" });
   }
 );
+
+// ==========================
+// ADMIN: UPDATE ANY REQUEST
+// ==========================
+router.put(
+  "/admin/:id",
+  authenticateToken,
+  requireAdmin,
+  upload.single("image"),
+  (req, res) => {
+    const id = req.params.id;
+
+    const existing = db.prepare(`
+      SELECT *
+      FROM requests
+      WHERE id = ? AND is_deleted = 0
+    `).get(id);
+
+    if (!existing) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    const {
+      title,
+      description,
+      hourly_rate,
+      price,
+      subcategory
+    } = req.body;
+
+    const parsedHourly = hourly_rate !== undefined ? Number(hourly_rate) : null;
+    const parsedPrice = price !== undefined ? Number(price) : null;
+
+    const imagePath = req.file
+      ? `/uploads/${req.file.filename}`
+      : existing.image;
+
+    db.prepare(`
+      UPDATE requests SET
+        title = ?,
+        description = ?,
+        hourly_rate = ?,
+        price = ?,
+        subcategory = ?,
+        image = ?
+      WHERE id = ?
+    `).run(
+      title ?? existing.title,
+      description ?? existing.description,
+      existing.type === "job_listing" ? parsedHourly : null,
+      existing.type === "store" ? parsedPrice : null,
+      existing.type === "store" ? subcategory : null,
+      imagePath,
+      id
+    );
+
+    res.json({ message: "Post updated by admin" });
+  }
+);
+
+
 
 export default router;

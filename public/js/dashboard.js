@@ -18,8 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const storeRequestForm = document.getElementById("storeRequestForm");
   if (storeRequestForm) storeRequestForm.addEventListener("submit", submitStoreRequest);
 
-  const serviceAvailRequestForm = document.getElementById("serviceAvailRequestForm");
-  if (serviceAvailRequestForm) serviceAvailRequestForm.addEventListener("submit", submitServiceAvailRequest);
+  const jobCancelEditBtn = document.getElementById("jobCancelEditBtn");
+  if (jobCancelEditBtn) jobCancelEditBtn.addEventListener("click", cancelJobEdit);
+
+  const storeCancelEditBtn = document.getElementById("storeCancelEditBtn");
+  if (storeCancelEditBtn) storeCancelEditBtn.addEventListener("click", cancelStoreEdit);
 
   loadDashboard();
   loadServiceAvailJobsDropdown();
@@ -127,10 +130,14 @@ async function loadUserRequests() {
 
       const statusText = r.status === "deleted" ? "Deleted" : r.status;
 
+      // Added Edit button alongside Delete
       const actionHtml =
         r.status === "deleted"
           ? "—"
-          : `<button class="delete-request" data-id="${r.id}">Delete</button>`;
+          : `
+            <button class="edit-request" data-id="${r.id}">Edit</button>
+            <button class="delete-request" data-id="${r.id}">Delete</button>
+          `;
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -150,8 +157,285 @@ async function loadUserRequests() {
 }
 
 // ==========================
-// LOAD USER APPLICATIONS
+// EVENT LISTENER FOR EDIT & DELETE BUTTONS
 // ==========================
+document.addEventListener("click", async (e) => {
+  // Edit request button
+  if (e.target.classList.contains("edit-request")) {
+    const requestId = e.target.dataset.id;
+    openEditForm(requestId);
+    return;
+  }
+
+  // Delete request button
+  if (e.target.classList.contains("delete-request")) {
+    const requestId = e.target.dataset.id;
+    if (!confirm("Are you sure you want to delete this request?")) return;
+
+    const isAdmin = document.getElementById("adminDashboard")?.style.display === "block";
+    const url = isAdmin ? `/requests/admin/${requestId}` : `/requests/${requestId}`;
+
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: API_HEADERS(),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to delete request");
+        return;
+      }
+
+      if (isAdmin) {
+        loadAdminPendingRequests();
+        loadAdminAllRequests();
+      } else {
+        loadUserRequests();
+      }
+    } catch (err) {
+      console.error("Error deleting request:", err);
+      alert("Failed to delete request. Please try again.");
+    }
+    return;
+  }
+
+  // Delete application button
+  if (e.target.classList.contains("delete-application")) {
+    const applicationId = e.target.dataset.id;
+    if (!confirm("Are you sure you want to delete this application?")) return;
+
+    try {
+      const res = await fetch(`/applications/${applicationId}`, {
+        method: "DELETE",
+        headers: API_HEADERS(),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to delete application");
+        return;
+      }
+
+      const row = e.target.closest("tr");
+      if (row) row.remove();
+    } catch (err) {
+      console.error("Error deleting application:", err);
+      alert("Failed to delete application. Please try again.");
+    }
+    return;
+  }
+});
+
+// ==========================
+// OPEN EDIT FORM (Prefill and show the form for editing)
+// ==========================
+async function openEditForm(requestId) {
+  try {
+    // Fetch user's requests to find the specific one
+    const res = await fetch("/requests/my", { headers: API_HEADERS() });
+    if (!res.ok) {
+      alert("Failed to fetch your requests");
+      return;
+    }
+    const requests = await res.json();
+    const request = requests.find((r) => r.id === Number(requestId));
+
+    if (!request) {
+      alert("Request not found");
+      return;
+    }
+
+    if (request.type === "job_listing") {
+      // Prefill job form
+      document.getElementById("jobRequestId").value = request.id;
+      document.getElementById("jobTitle").value = request.title;
+      document.getElementById("jobDescription").value = request.description;
+      document.getElementById("hourlyRate").value = request.hourly_rate || "";
+
+      // Clear file input (cannot set file programmatically)
+      document.getElementById("jobImage").value = "";
+
+      // Toggle buttons
+      document.getElementById("jobSubmitBtn").textContent = "Update Job Request";
+      document.getElementById("jobCancelEditBtn").style.display = "inline-block";
+
+      // Scroll to form (optional)
+      document.getElementById("jobRequestForm").scrollIntoView({ behavior: "smooth" });
+    } else if (request.type === "store") {
+      // Prefill store form
+      document.getElementById("storeRequestId").value = request.id;
+      document.getElementById("storeTitle").value = request.title;
+      document.getElementById("storeDescription").value = request.description;
+      document.getElementById("price").value = request.price || "";
+      document.getElementById("storeSubcategory").value = request.subcategory || "";
+
+      document.getElementById("storeImage").value = "";
+
+      document.getElementById("storeSubmitBtn").textContent = "Update Store Request";
+      document.getElementById("storeCancelEditBtn").style.display = "inline-block";
+
+      document.getElementById("storeRequestForm").scrollIntoView({ behavior: "smooth" });
+    } else {
+      alert("Editing not supported for this request type.");
+    }
+  } catch (err) {
+    console.error("Error opening edit form:", err);
+    alert("Failed to open edit form.");
+  }
+}
+
+// ==========================
+// CANCEL EDIT FUNCTIONS
+// ==========================
+function cancelJobEdit() {
+  resetJobForm();
+}
+
+function cancelStoreEdit() {
+  resetStoreForm();
+}
+
+// ==========================
+// RESET FORMS
+// ==========================
+function resetJobForm() {
+  const form = document.getElementById("jobRequestForm");
+  form.reset();
+  document.getElementById("jobRequestId").value = "";
+  document.getElementById("jobSubmitBtn").textContent = "Submit Job Request";
+  document.getElementById("jobCancelEditBtn").style.display = "none";
+}
+
+function resetStoreForm() {
+  const form = document.getElementById("storeRequestForm");
+  form.reset();
+  document.getElementById("storeRequestId").value = "";
+  document.getElementById("storeSubmitBtn").textContent = "Submit Store Request";
+  document.getElementById("storeCancelEditBtn").style.display = "none";
+}
+
+// ==========================
+// SUBMIT JOB REQUEST (CREATE or UPDATE)
+// ==========================
+async function submitJobRequest(e) {
+  e.preventDefault();
+
+  const requestId = document.getElementById("jobRequestId").value;
+  const formData = new FormData(e.target);
+  formData.append("type", "job_listing");
+
+  let url, method;
+
+  if (requestId) {
+    // UPDATE existing request
+    url = `/requests/${requestId}`;
+    method = "PUT";
+  } else {
+    // CREATE new request
+    url = "/requests/create";
+    method = "POST";
+  }
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        // DO NOT set Content-Type with FormData
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      alert("Failed to submit job request: " + (errData.message || "Unknown error"));
+      return;
+    }
+
+    if (requestId) resetJobForm();
+    else e.target.reset();
+
+    loadUserRequests();
+  } catch (err) {
+    console.error("Error submitting job request:", err);
+    alert("Failed to submit job request.");
+  }
+}
+
+// ==========================
+// SUBMIT STORE REQUEST (CREATE or UPDATE)
+// ==========================
+async function submitStoreRequest(e) {
+  e.preventDefault();
+
+  const requestId = document.getElementById("storeRequestId").value;
+  const formData = new FormData();
+
+  // Always send fields explicitly
+  formData.append("title", document.getElementById("storeTitle").value);
+  formData.append("description", document.getElementById("storeDescription").value);
+  formData.append("price", document.getElementById("price").value);
+  formData.append("subcategory", document.getElementById("storeSubcategory").value);
+
+  const imageFile = document.getElementById("storeImage").files[0];
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  let url, method;
+
+  if (requestId) {
+    // UPDATE
+    url = `/requests/${requestId}`;
+    method = "PUT";
+  } else {
+    // CREATE
+    formData.append("type", "store"); // ONLY for create
+    url = "/requests/create";
+    method = "POST";
+  }
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.message || "Failed to submit store request");
+      return;
+    }
+
+    if (requestId) resetStoreForm();
+    else e.target.reset();
+
+    loadUserRequests();
+  } catch (err) {
+    console.error("Error submitting store request:", err);
+    alert("Failed to submit store request.");
+  }
+}
+
+// ==========================
+// LOGOUT
+// ==========================
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "/login.html";
+}
+
+// ==========================
+// PLACEHOLDER FUNCTIONS
+// ==========================
+// Implement your existing functions for applications and admin views here...
+
 async function loadUserApplications() {
   try {
     const res = await fetch("/applications/user", { headers: API_HEADERS() });
@@ -191,9 +475,6 @@ async function loadUserApplications() {
   }
 }
 
-// ==========================
-// LOAD ADMIN PENDING REQUESTS
-// ==========================
 async function loadAdminPendingRequests() {
   try {
     const res = await fetch("/requests/pending", { headers: API_HEADERS() });
@@ -254,9 +535,6 @@ async function loadAdminPendingRequests() {
   }
 }
 
-// ==========================
-// LOAD ADMIN ALL REQUESTS (ALL POSTS)
-// ==========================
 async function loadAdminAllRequests() {
   try {
     const res = await fetch("/requests/admin/all", { headers: API_HEADERS() });
@@ -281,7 +559,8 @@ async function loadAdminAllRequests() {
       const actionHtml =
         p.status === "deleted"
           ? "—"
-          : `<button class="delete-request" data-id="${p.id}">Delete</button>`;
+          : `<button onclick='openAdminEdit(${JSON.stringify(p)})'>Edit</button> 
+              <button class="delete-request" data-id="${p.id}">Delete</button>`;
 
       tbody.innerHTML += `
         <tr>
@@ -298,9 +577,6 @@ async function loadAdminAllRequests() {
   }
 }
 
-// ==========================
-// LOAD ADMIN APPLICATIONS
-// ==========================
 async function loadAdminApplications() {
   try {
     const res = await fetch("/applications/admin", { headers: API_HEADERS() });
@@ -340,174 +616,6 @@ async function loadAdminApplications() {
   }
 }
 
-// ==========================
-// DELETE HANDLER (GLOBAL)
-// ==========================
-document.addEventListener("click", async (e) => {
-  // Delete request button
-  if (e.target.classList.contains("delete-request")) {
-    const requestId = e.target.dataset.id;
-    if (!confirm("Are you sure you want to delete this request?")) return;
-
-    const isAdmin = document.getElementById("adminDashboard")?.style.display === "block";
-    const url = isAdmin ? `/requests/admin/${requestId}` : `/requests/${requestId}`;
-
-    try {
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: API_HEADERS(),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to delete request");
-        return;
-      }
-
-      if (isAdmin) {
-        loadAdminPendingRequests();
-        loadAdminAllRequests();
-      } else {
-        loadUserRequests();
-      }
-    } catch (err) {
-      console.error("Error deleting request:", err);
-      alert("Failed to delete request. Please try again.");
-    }
-  }
-
-  // Delete application button
-  if (e.target.classList.contains("delete-application")) {
-    const applicationId = e.target.dataset.id;
-    if (!confirm("Are you sure you want to delete this application?")) return;
-
-    try {
-      const res = await fetch(`/applications/${applicationId}`, {
-        method: "DELETE",
-        headers: API_HEADERS(),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to delete application");
-        return;
-      }
-
-      const row = e.target.closest("tr");
-      if (row) row.remove();
-    } catch (err) {
-      console.error("Error deleting application:", err);
-      alert("Failed to delete application. Please try again.");
-    }
-  }
-});
-
-// ==========================
-// ADMIN ACTIONS
-// ==========================
-async function approveRequest(id) {
-  try {
-    await fetch(`/requests/${id}/approve`, {
-      method: "POST",
-      headers: API_HEADERS(),
-    });
-    loadAdminPendingRequests();
-    loadAdminAllRequests();
-  } catch (err) {
-    console.error("Error approving request:", err);
-  }
-}
-
-async function rejectRequest(id) {
-  try {
-    await fetch(`/requests/${id}/reject`, {
-      method: "POST",
-      headers: API_HEADERS(),
-    });
-    loadAdminPendingRequests();
-    loadAdminAllRequests();
-  } catch (err) {
-    console.error("Error rejecting request:", err);
-  }
-}
-
-// ==========================
-// FORM SUBMISSIONS
-// ==========================
-async function submitJobRequest(e) {
-  e.preventDefault();
-
-  const formData = new FormData();
-  formData.append("type", "job_listing");
-  formData.append("title", document.getElementById("jobTitle")?.value || "");
-  formData.append("description", document.getElementById("jobDescription")?.value || "");
-  formData.append("hourly_rate", document.getElementById("hourlyRate")?.value || "");
-
-  const jobImage = document.getElementById("jobImage");
-  if (jobImage?.files[0]) {
-    formData.append("image", jobImage.files[0]);
-  }
-
-  try {
-    const res = await fetch("/requests/create", {
-      method: "POST",
-      headers: API_HEADERS(),
-      body: formData,
-    });
-
-    if (!res.ok) {
-      alert("Failed to submit job request.");
-      return;
-    }
-
-    e.target.reset();
-    loadUserRequests();
-  } catch (err) {
-    console.error("Error submitting job request:", err);
-    alert("Failed to submit job request.");
-  }
-}
-
-async function submitStoreRequest(e) {
-  e.preventDefault();
-
-  const formData = new FormData();
-  formData.append("type", "store");
-  formData.append("title", document.getElementById("storeTitle")?.value || "");
-  formData.append("description", document.getElementById("storeDescription")?.value || "");
-  formData.append("price", document.getElementById("price")?.value || "");
-  formData.append("subcategory", document.getElementById("storeSubcategory")?.value || "");
-
-  const storeImage = document.getElementById("storeImage");
-  if (storeImage?.files[0]) {
-    formData.append("image", storeImage.files[0]);
-  }
-
-  try {
-    const res = await fetch("/requests/create", {
-      method: "POST",
-      headers: API_HEADERS(),
-      body: formData,
-    });
-
-    if (!res.ok) {
-      alert("Failed to submit store request.");
-      return;
-    }
-
-    e.target.reset();
-    loadUserRequests();
-  } catch (err) {
-    console.error("Error submitting store request:", err);
-    alert("Failed to submit store request.");
-  }
-}
-
-// ==========================
-// LOAD APPROVED JOBS INTO SERVICE AVAIL DROPDOWN
-// ==========================
 async function loadServiceAvailJobsDropdown() {
   try {
     const res = await fetch("/requests/jobs/approved", { headers: API_HEADERS() });
@@ -535,54 +643,67 @@ async function loadServiceAvailJobsDropdown() {
 }
 
 // ==========================
-// SUBMIT SERVICE AVAIL REQUEST
+// ADMIN EDIT MODAL
 // ==========================
-async function submitServiceAvailRequest(e) {
+function openAdminEdit(post) {
+  adminEditModal.style.display = "flex";
+
+  adminEditId.value = post.id;
+  adminEditTitle.value = post.title;
+  adminEditDescription.value = post.description;
+
+  adminEditHourlyRate.style.display = "none";
+  adminEditPrice.style.display = "none";
+  adminEditSubcategory.style.display = "none";
+
+  if (post.type === "job_listing") {
+    adminEditHourlyRate.style.display = "block";
+    adminEditHourlyRate.value = post.hourly_rate;
+  } else {
+    adminEditPrice.style.display = "block";
+    adminEditSubcategory.style.display = "block";
+    adminEditPrice.value = post.price;
+    adminEditSubcategory.value = post.subcategory;
+  }
+}
+
+function closeAdminEdit() {
+  adminEditModal.style.display = "none";
+  adminEditForm.reset();
+}
+
+
+// ==========================
+// ADMIN EDIT SUBMIT
+// ==========================
+adminEditForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const formData = new FormData();
-  formData.append("type", "service_avail");
-  formData.append("title", document.getElementById("serviceTitle")?.value || "");
-  formData.append("description", document.getElementById("serviceDescription")?.value || "");
-  formData.append("parent_job_id", document.getElementById("parentJobId")?.value || "");
+  const id = adminEditId.value;
+  const fd = new FormData();
 
-  const serviceImage = document.getElementById("serviceImage");
-  if (serviceImage?.files[0]) {
-    formData.append("image", serviceImage.files[0]);
+  fd.append("title", adminEditTitle.value);
+  fd.append("description", adminEditDescription.value);
+
+  if (adminEditHourlyRate.style.display === "block") {
+    fd.append("hourly_rate", adminEditHourlyRate.value);
   }
 
-  try {
-    const res = await fetch("/requests/create", {
-      method: "POST",
-      headers: API_HEADERS(),
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      alert("Failed to submit service avail request: " + (errorData.message || "Unknown error"));
-      return;
-    }
-
-    e.target.reset();
-    loadUserRequests();
-    alert("Service avail request submitted successfully!");
-  } catch (err) {
-    console.error("Error submitting service avail request:", err);
-    alert("Failed to submit service avail request.");
+  if (adminEditPrice.style.display === "block") {
+    fd.append("price", adminEditPrice.value);
+    fd.append("subcategory", adminEditSubcategory.value);
   }
-}
 
-// ==========================
-// LOGOUT FUNCTION
-// ==========================
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "/login.html";
-}
+  if (adminEditImage.files[0]) {
+    fd.append("image", adminEditImage.files[0]);
+  }
 
-// ==========================
-// GLOBALS (INLINE BUTTONS)
-// ==========================
-window.approveRequest = approveRequest;
-window.rejectRequest = rejectRequest;
+  await fetch(`/requests/admin/${id}`, {
+    method: "PUT",
+    headers: API_HEADERS(),
+    body: fd,
+  });
+
+  closeAdminEdit();
+  loadAdminAllRequests();
+});
