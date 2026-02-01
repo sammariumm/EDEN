@@ -227,6 +227,59 @@ document.addEventListener("click", async (e) => {
     }
     return;
   }
+
+    // Accept application button
+  if (e.target.classList.contains("accept-application")) {
+    const applicationId = e.target.dataset.id;
+    if (!confirm("Accept this application?")) return;
+
+    try {
+      const res = await fetch(`/applications/${applicationId}/accept`, {
+        method: "PATCH",
+        headers: API_HEADERS(),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to accept application");
+        return;
+      }
+
+      loadAdminApplications();
+    } catch (err) {
+      console.error("Error accepting application:", err);
+      alert("Failed to accept application.");
+    }
+    return;
+  }
+
+  // Reject application button
+  if (e.target.classList.contains("reject-application")) {
+    const applicationId = e.target.dataset.id;
+    if (!confirm("Reject this application?")) return;
+
+    try {
+      const res = await fetch(`/applications/${applicationId}/reject`, {
+        method: "PATCH",
+        headers: API_HEADERS(),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to reject application");
+        return;
+      }
+
+      loadAdminApplications();
+    } catch (err) {
+      console.error("Error rejecting application:", err);
+      alert("Failed to reject application.");
+    }
+    return;
+  }
+
 });
 
 // ==========================
@@ -436,6 +489,12 @@ function logout() {
 // ==========================
 // Implement your existing functions for applications and admin views here...
 
+function formatStatus(status) {
+  if (status === "accepted") return `<span style="color:green;">Accepted</span>`;
+  if (status === "rejected") return `<span style="color:red;">Rejected</span>`;
+  return `<span style="color:orange;">Pending</span>`;
+}
+
 async function loadUserApplications() {
   try {
     const res = await fetch("/applications/user", { headers: API_HEADERS() });
@@ -458,14 +517,31 @@ async function loadUserApplications() {
     applications.forEach((app) => {
       const submittedDate = new Date(app.submitted_at).toLocaleString();
 
+      if (app.status === "pending") {
+        actionButtons = `
+          <button class="accept-application" data-id="${app.id}">Accept</button>
+          <button class="reject-application" data-id="${app.id}">Reject</button>
+          <button class="delete-application" data-id="${app.id}">Delete</button>
+        `;
+      } else {
+        actionButtons = `
+          <strong>${(app.status || "pending").toUpperCase()}</strong>
+          <button class="delete-application" data-id="${app.id}">Delete</button>
+        `;
+      }
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${app.job_title}</td>
         <td>${app.applicant_name}</td>
         <td>${app.applicant_email}</td>
         <td>${submittedDate}</td>
-        <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
-        <td><button class="delete-application" data-id="${app.id}">Delete</button></td>
+        <td>
+          <a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">
+            View Resume
+          </a>
+        </td>
+        <td>${actionButtons}</td>
       `;
 
       tbody.appendChild(tr);
@@ -599,18 +675,38 @@ async function loadAdminApplications() {
     applications.forEach((app) => {
       const submittedDate = new Date(app.submitted_at).toLocaleString();
 
+      let actionButtons = "";
+
+      if (app.status === "pending") {
+        actionButtons = `
+          <button class="accept-application" data-id="${app.id}">Accept</button>
+          <button class="reject-application" data-id="${app.id}">Reject</button>
+          <button class="delete-application" data-id="${app.id}">Delete</button>
+        `;
+      } else {
+        actionButtons = `
+          <strong>${(app.status || "pending").toUpperCase()}</strong>
+          <button class="delete-application" data-id="${app.id}">Delete</button>
+        `;
+      }
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${app.job_title}</td>
         <td>${app.applicant_name}</td>
         <td>${app.applicant_email}</td>
         <td>${submittedDate}</td>
-        <td><a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">View Resume</a></td>
-        <td><button class="delete-application" data-id="${app.id}">Delete</button></td>
+        <td>
+          <a href="${app.resume_path}" target="_blank" rel="noopener noreferrer">
+            View Resume
+          </a>
+        </td>
+        <td>${actionButtons}</td>
       `;
 
       tbody.appendChild(tr);
     });
+
   } catch (err) {
     console.error("Error loading admin applications:", err);
   }
