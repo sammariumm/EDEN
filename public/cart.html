@@ -64,12 +64,30 @@
             <h3>Payment Details</h3>
 
             <input type="email" id="email" placeholder="Email Address" required>
-            <input type="text" id="card-name" placeholder="Cardholder Name" required>
-            <input type="text" id="card-number" placeholder="Card Number" required>
+
+            <input type="text"
+                  id="card-name"
+                  placeholder="Cardholder Name"
+                  pattern="[A-Za-z ]{3,}"
+                  required>
+
+            <input type="text"
+                  id="card-number"
+                  placeholder="Card Number"
+                  inputmode="numeric"
+                  pattern="\d{16}"
+                  maxlength="16"
+                  required>
 
             <div class="payment-row">
-                <input type="month" id="expiry" required>
-                <input type="password" id="cvv" placeholder="CVV" required>
+              <input type="month" id="expiry" required>
+
+              <input type="password"
+                    id="cvv"
+                    placeholder="CVV"
+                    pattern="\d{3,4}"
+                    maxlength="4"
+                    required>
             </div>
 
             <button id="checkout-btn" type="submit" disabled>

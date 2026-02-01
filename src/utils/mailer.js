@@ -19,9 +19,9 @@ export async function sendReceiptEmail({ to, cart, totals }) {
     <h2>Thank you for your purchase!</h2>
     <p>Here is your order receipt:</p>
     <ul>${itemsHtml}</ul>
-    <p><strong>Subtotal:</strong> ₱${(totals.subtotal / 10).toFixed(2)}</p>
-    <p><strong>Tax:</strong> ₱${(totals.tax / 10).toFixed(2)}</p>
-    <p><strong>Total:</strong> ₱${(totals.total / 10).toFixed(2)}</p>
+    <p><strong>Subtotal:</strong> ₱${(totals.subtotal).toFixed(2)}</p>
+    <p><strong>Tax:</strong> ₱${(totals.tax).toFixed(2)}</p>
+    <p><strong>Total:</strong> ₱${(totals.total).toFixed(2)}</p>
   `;
 
   await transporter.sendMail({
