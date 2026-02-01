@@ -9,41 +9,56 @@ const router = express.Router();
 // INPUT VALIDATION
 // ==========================
 function validateRequestInput(type, body) {
+
   if (type === "job_listing") {
-    const { title, description, hourly_rate } = body;
+    const title = body.title?.trim();
+    const description = body.description?.trim();
+    const hourlyStr = body.hourly_rate;
+
+    // Allow empty string → false, but "450" → true after conversion
+    const hourly = hourlyStr ? Number(hourlyStr) : NaN;
+
     return (
-      title &&
-      description &&
-      typeof hourly_rate === "number" &&
-      !isNaN(hourly_rate)
+      title && title.length > 0 &&
+      description && description.length > 0 &&
+      !isNaN(hourly) &&
+      hourly > 0                      // optional: enforce positive rate
     );
   }
 
   if (type === "store") {
-    const { title, description, price, subcategory } = body;
+    const title = body.title?.trim();
+    const description = body.description?.trim();
+    const priceStr = body.price;
+    const subcategory = body.subcategory?.trim();
+
+    const price = priceStr ? Number(priceStr) : NaN;
+
     const validSubcategories = [
-      "tools",
-      "decoration",
-      "plants",
-      "flowers",
-      "miscellaneous"
+      "tools", "decoration", "plants", "flowers", "miscellaneous"
     ];
 
     return (
-      title &&
-      description &&
-      typeof price === "number" &&
+      title && title.length > 0 &&
+      description && description.length > 0 &&
       !isNaN(price) &&
+      price > 0 &&
       validSubcategories.includes(subcategory)
     );
   }
 
   if (type === "service_avail") {
-    const { title, description, parent_job_id } = body;
+    const title = body.title?.trim();
+    const description = body.description?.trim();
+    const parentStr = body.parent_job_id;
+
+    const parentId = parentStr ? Number(parentStr) : NaN;
+
     return (
-      title &&
-      description &&
-      Number.isInteger(Number(parent_job_id))
+      title && title.length > 0 &&
+      description && description.length > 0 &&
+      Number.isInteger(parentId) &&
+      parentId > 0
     );
   }
 
@@ -83,8 +98,17 @@ router.get("/my", authenticateToken, (req, res) => {
 router.post(
   "/create",
   authenticateToken,
-  upload.single("image"),
+  upload.none(),
   (req, res) => {
+    // FOR DEBUGGING
+    /**
+     *  console.log("=== /requests/create called ===");
+        console.log("req.body:", req.body);                     // ← most important
+        console.log("req.file:", req.file);                     // if image uploaded
+        console.log("hourly_rate raw:", req.body.hourly_rate);
+        console.log("hourly_rate type:", typeof req.body.hourly_rate);
+        console.log("All keys in req.body:", Object.keys(req.body));
+     */
     const {
       type,
       title,
