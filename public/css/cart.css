@@ -76,17 +76,11 @@ header
 
 /* CART CONTAINER: Two-column layout */
 .container {
-    background: rgba(255, 255, 255, 0.40);   /* 75% opaque white → quite see-through */
-    /* or try these opacity levels: */
-    /* background: rgba(255, 255, 255, 0.90);  ← subtle */
-    /* background: rgba(255, 255, 255, 0.60);  ← more transparent */
-    /* background: rgba(255, 255, 255, 0.40);  ← very ghostly */
-    
-    backdrop-filter: blur(8px);          /* blurs what's behind → modern glass effect */
-    -webkit-backdrop-filter: blur(8px);  /* Safari support */
-    
+    background: rgba(255, 255, 255, 0.40);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.25);  /* subtle edge highlight */
+    border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 
     z-index: 1;
@@ -95,27 +89,38 @@ header
     margin: 150px auto 50px;
     padding: 20px;
     display: flex;
+    height: auto;                    /* or remove if not set */
+    max-height: 80vh;                /* ← cap the WHOLE container (adjust 70-85vh to taste) */
+    overflow: hidden;                /* ← prevents container scrollbar; left handles its own */
+    min-height: 400px;               /* optional: minimum so short carts don't collapse too much */
     gap: 30px;
     flex-wrap: wrap;
-    box-sizing: border-box;             /* or #f9f9f9 to match body bg */
-    border-radius: 12px;                /* wraps everything nicely */
+    align-items: stretch;
+    box-sizing: border-box;
+    border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+
+    /* Remove conflicting min/max heights – let children control */
+    /* min-height: 500px; */  /* ← comment out or remove if too rigid */
+    /* max-height: 80vh; */   /* ← remove: unnecessary, as .cart-left caps it */
+    /* min-height: 65vh; */   /* ← remove: use min-height on children if needed */
 }
 
 /* Left column: items */
 .cart-left {
-    flex: 2;
+    flex: 2 1 0;  /* grow yes, shrink yes, basis 0 – helps strict capping */
+    max-width: 66.66%;
     background: #FEFAE0;
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     
-    /* Scrolling when content overflows */
-    max-height: 65vh;               /* adjust as needed – e.g. 70vh or 800px */
-    overflow-y: auto;               /* vertical scrollbar appears when needed */
-    scrollbar-gutter: stable both-edges;
+    max-height: 61vh;
+    min-height: 0;
+    overflow-y: auto;  /* ← changed to scroll: always reserves space, no shifts/growth */
+    scrollbar-gutter: stable;  /* remove both-edges if it adds extra padding – test */
     overflow-x: hidden;
-    scrollbar-width: thin;          /* nicer scrollbar on Firefox */
+    scrollbar-width: thin;
 }
 
 /* Webkit scrollbar styling (Chrome/Edge/Safari) */
@@ -140,15 +145,19 @@ header
 
 /* Right column: summary & payment */
 .cart-right {
-    background: #FEFAE0;
-    position: relative; /* add this */
-    z-index: 2; /* ensure it sits above the video overlay */
-    flex: 1; /* take up 1/3 of space */
+    position: relative;
+    z-index: 2;
+    flex: 1 1 0;  /* grow yes, shrink yes, basis 0 */
     background: #505B39;
     padding: 20px;
     border-radius: 12px;
-    height: fit-content; /* adapt to content */
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    
+    display: flex;               /* ← ADD: flex column for internal alignment */
+    flex-direction: column;      /* ← ADD: stacks children vertically */
+    justify-content: flex-start; /* ← ADD: content at top, no bottom gap */
+    height: auto;
+    align-self: stretch;
 }
 
 /* Make totals and payment stand out */
@@ -156,8 +165,10 @@ header
     background: #FEFAE0;
     padding: 15px;
     border-radius: 10px;
-    margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    
+    /* Remove auto margin – prevents unwanted pushing/gaps */
+    /* margin-top: auto; */  /* ← comment out: was causing large bottom gap */
 }
 
 /* Add hover effect on checkout */
@@ -171,8 +182,21 @@ header
     margin-bottom: 20px;
 }
 
+.cart-left,
+.cart-right {
+    border-radius: 12px;           /* already have, but ensures rounded corners look good when stretched */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* already have */
+}
+
+/* If right side content should hug the bottom when stretched: */
+.cart-right .cart-total,
+.cart-right .payment-form {
+    margin-top: auto;              /* pushes these to bottom if .cart-right is tall */
+}
+
 /* CART ROWS */
 /* Card for each cart item */
+
 #cart-items {
     display: flex;
     flex-direction: column;
@@ -269,6 +293,12 @@ header
     min-height: 36px;
 }
 
+.cart-item-quantity input[type="number"]::-webkit-inner-spin-button,
+.cart-item-quantity input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .cart-item-quantity input[type="number"] {
     width: 60px;
     padding: 6px;
@@ -357,6 +387,7 @@ header
 .cart-total {
     text-align: right;
     margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .cart-total-title {
