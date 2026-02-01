@@ -20,7 +20,7 @@ export async function sendEmail(to, subject, message) {
   }
 
   await transporter.sendMail({
-    from: `"EDEN" <${process.env.GMAIL_USER}>`,
+    from: `"EDEN Job Application" <${process.env.GMAIL_USER}>`,
     to,
     subject,
     // Allow HTML but also work with plain text
@@ -52,6 +52,7 @@ export async function sendReceiptEmail({ to, cart, totals }) {
     <p><strong>Subtotal:</strong> ₱${totals.subtotal.toFixed(2)}</p>
     <p><strong>Tax:</strong> ₱${totals.tax.toFixed(2)}</p>
     <p><strong>Total:</strong> ₱${totals.total.toFixed(2)}</p>
+    <p>Thank you for trusting EDEN!</p>
   `;
 
   await transporter.sendMail({

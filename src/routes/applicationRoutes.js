@@ -232,8 +232,8 @@ router.patch("/applications/:id/accept", authenticateToken, async (req, res) => 
     try {
       await sendEmail(
         application.applicant_email,
-        "Application Accepted",
-        `Congratulations! Your application has been accepted. We'll be in touch soon.`
+        "Your EDEN Job Application Update",
+        `Congratulations! Your application has been accepted. We'll be in touch soon with regards to your interview schedule and salary matters. Thank you for trusting EDEN!`
       );
     } catch (emailErr) {
       console.error("Email send failed:", emailErr);
@@ -295,8 +295,8 @@ router.patch("/applications/:id/reject", authenticateToken, async (req, res) => 
     try {
       await sendEmail(
         application.applicant_email,
-        "Application Update",
-        "Thank you for your interest. After careful consideration, we regret to inform you that your application was not selected."
+        "Your EDEN Job Application Update",
+        "Thank you for your interest. After careful consideration, we regret to inform you that your application was not selected. If you have any concerns, feel free to reply to this email. Thank you for trusting EDEN!"
       );
     } catch (emailErr) {
       console.error("Rejection email failed:", emailErr);
