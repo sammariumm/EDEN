@@ -674,6 +674,7 @@ button[type=submit] {
   font-weight: bold;
   font-size: 15px;
   transition: box-shadow 0.2s; 
+  cursor: pointer;
 }
 
 button[type=submit] a {

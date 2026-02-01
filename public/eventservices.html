@@ -7,7 +7,17 @@
         <link rel = "stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <meta name ="viewport" content = "width=device-width, initial-scale=1, user-scalable=no">
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-
+        <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+        </script>
+        <script type="text/javascript">
+        (function(){
+            emailjs.init({
+                publicKey: "sb4zXVG5lxrJV_fVc",
+            });
+        })();
+        </script>
+        <script src = "js/eventservices.js"></script>
     </head>
     <header class= "Absolute" >
         <nav class = "navigation_bar" id = "blur">
@@ -194,8 +204,6 @@
 
             
         </div>
-
-        <script src = "js/eventservices.js"></script>
      
         <section id="footer">
             <div class="main-footer" id = "blur2">
@@ -249,18 +257,18 @@
             <label for="selection">Choose an option:</label>
             <select id="selection">
               <option value="default">-- Select Event --</option>
-              <option value="image1">Gender Reveal</option>
-              <option value="image2">Baptismal</option>
-              <option value="image3">Debut</option>
-              <option value="image4">Graduation Ball</option>
-              <option value="image5">Outdoor Weddings</option>
-              <option value="image6">Beach Weddings</option>
-              <option value="image7">Anniversaries</option>
-              <option value="image8">Funerals</option>
-              <option value="image9">Birthday Party</option>
-              <option value="image10">Welcome Party</option>
-              <option value="image11">Mother's Day</option>
-              <option value="image12">Father's Day</option>
+              <option value="Gender Reveal">Gender Reveal</option>
+              <option value="Baptismal">Baptismal</option>
+              <option value="Debut">Debut</option>
+              <option value="Graduation Ball">Graduation Ball</option>
+              <option value="Outdoor Weddings">Outdoor Weddings</option>
+              <option value="Beach Weddings">Beach Weddings</option>
+              <option value="Anniversaries">Anniversaries</option>
+              <option value="Funerals">Funerals</option>
+              <option value="Birthday Party">Birthday Party</option>
+              <option value="Welcome Party">Welcome Party</option>
+              <option value="Mothers Day">Mother's Day</option>
+              <option value="Fathers Day">Father's Day</option>
             </select>
 
             <select id="selection_package">
@@ -272,10 +280,15 @@
               <option>Luxury: Php 80,000 - Php 100,000</option>
             </select>
         
-            <input type="text" placeholder="Your Name">
-            <input type="email" placeholder="Your Email">
-            <input type="contact" placeholder="Your Contact Number"> 
-            <button type="submit"> <a href = "avail.html"> Submit </a> </button>
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Your Email" required>
+            <input type="tel" id="contact_number" placeholder="Your Contact Number" required> 
+            <input type="date" id="date" placeholder="Date of Event" required>
+            <input type="time" id="time" placeholder="Time of Event" required>
+            <input type="text" id="location_venue" placeholder="Location and Venue of Event" required>
+            <input type="number" id="attendees" placeholder="Number of Attendees" required>
+            <input type="text" id="special_request" placeholder="Special Requests (type none if no special requests)" required>
+            <button type="submit" onclick="sendMail()"> Submit </button>
             
             <a href="#" onclick="toggle()">Close</a>
           </div>
