@@ -645,6 +645,7 @@ a.fill-div {
 }
 
 #previewImage {
+  margin-top: 142px;
   margin-right: 20px;
   width: 500px;
   height: 400px;
