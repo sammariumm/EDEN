@@ -12,6 +12,16 @@
   />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <noscript><link rel="stylesheet" href="css/noscript.css" /></noscript>
+  <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+        </script>
+        <script type="text/javascript">
+        (function(){
+            emailjs.init({
+                publicKey: "sb4zXVG5lxrJV_fVc",
+            });
+        })();
+        </script>
 </head>
 <body>
   <header>
@@ -50,7 +60,8 @@
       <div id="choice-view">
         <h2>Choose an action</h2>
         <button id="choose-apply-btn">Apply for Job</button>
-        <button id="choose-avail-btn">Avail as Service</button>
+        <input type="email" id="avail_email" placeholder="Enter your e-mail when availing as service"/>
+        <button id="choose-avail-btn" onclick="sendMail()">Avail as Service</button>
       </div>
 
       <!-- Application Form -->

@@ -159,3 +159,11 @@ document.addEventListener("DOMContentLoaded", () => {
     loadJobs(jobSearchInput.value);
   });
 });
+
+function sendMail() {
+
+    let parms = {
+      email : document.getElementById("avail_email").value,
+    }
+    emailjs.send("service_hlabdx8","template_3cg6671",parms).then(alert("Please check your E-mail."))
+  }
