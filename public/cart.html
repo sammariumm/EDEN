@@ -1,96 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Shopping Cart</title>
-  <link rel="stylesheet" href="css/cart.css">
+  <link rel="stylesheet" href="css/cart.css" />
 </head>
-
 
 <body>
 
-  <!-- NAVIGATION (kept EDEN structure) -->
+<!-- ================= NAVIGATION ================= -->
 <header>
   <nav class="navigation_bar">
     <div class="navigation">
-      <a href="index.html"> Home </a>
-      <a href="eventservices.html"> Event Services </a>
-      <a href="job_listings.html"> Job Listings </a>
-      <a href="store.html"> Store </a>
-      <a href="about.html"> About </a>
-      <a href="login.html"> Login </a>
-      <a href="cart.html" id="cart-link" style="position: relative;" class="active">
+      <a href="index.html">Home</a>
+      <a href="eventservices.html">Event Services</a>
+      <a href="job_listings.html">Job Listings</a>
+      <a href="store.html">Store</a>
+      <a href="about.html">About</a>
+      <a href="login.html">Login</a>
+
+      <a href="cart.html" id="cart-link" class="active" style="position: relative;">
         <img src="uploads/cart.png" style="height: 40px;">
         <span id="cart-count" class="cart-badge">0</span>
       </a>
     </div>
-  </nav>  
+  </nav>
 </header>
-  <section class = "promo">
-            <video class = "video-bg" autoplay muted loop>
-                <source src="uploads/store_promo.mp4" type="video/mp4">
-            </video>
-            <div class="video-overlay"></div>
-      </section>
-  <section class="container content-section">
-    <!-- LEFT COLUMN: Cart Items -->
-    <div class="cart-left">
-        <h2 class="section-header">Your Cart</h2>
-        
-        <!-- EDEN JS TARGET -->
-        <div id="cart-items"></div>
 
-        <p id="empty-cart-message" style="display:none;">Your cart is empty.</p>
+<!-- ================= PROMO VIDEO ================= -->
+<section class="promo">
+  <video class="video-bg" autoplay muted loop>
+    <source src="uploads/store_promo.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+</section>
+
+<!-- ================= CART CONTENT ================= -->
+<section class="container content-section">
+
+  <!-- LEFT: CART ITEMS -->
+  <div class="cart-left">
+    <h2 class="section-header">Your Cart</h2>
+
+    <!-- JS renders items here -->
+    <div id="cart-items"></div>
+
+    <p id="empty-cart-message" style="display:none;">
+      Your cart is empty.
+    </p>
+  </div>
+
+  <!-- RIGHT: SUMMARY & PAYMENT -->
+  <div class="cart-right">
+
+    <!-- SUMMARY -->
+    <div id="cart-summary" class="cart-total">
+      <p><strong>Subtotal:</strong> <span id="subtotal">₱0.00</span></p>
+      <p><strong>Tax (12%):</strong> <span id="tax">₱0.00</span></p>
+      <p class="cart-total-title">
+        <strong>Total:</strong>
+        <span id="total">₱0.00</span>
+      </p>
     </div>
 
-    <!-- RIGHT COLUMN: Summary & Payment -->
-    <div class="cart-right">
-        <div id="cart-summary" class="cart-total">
-            <p><strong>Subtotal:</strong> <span id="subtotal">₱0.00</span></p>
-            <p><strong>Tax (12%):</strong> <span id="tax">₱0.00</span></p>
-            <p class="cart-total-title">
-                <strong>Total:</strong>
-                <span id="total">₱0.00</span>
-            </p>
-        </div>
+    <!-- ================= CARD CHECKOUT ================= -->
+    <form id="payment-form" class="payment-form">
+      <h3>Card Payment</h3>
 
-        <form id="payment-form" class="payment-form">
-            <h3>Payment Details</h3>
+      <input type="email" id="email" placeholder="Email Address" required>
 
-            <input type="email" id="email" placeholder="Email Address" required>
+      <input type="text"
+             id="card-name"
+             placeholder="Cardholder Name"
+             pattern="[A-Za-z ]{3,}"
+             required>
 
-            <input type="text"
-                  id="card-name"
-                  placeholder="Cardholder Name"
-                  pattern="[A-Za-z ]{3,}"
-                  required>
+      <input type="text"
+             id="card-number"
+             placeholder="Card Number"
+             inputmode="numeric"
+             pattern="\d{16}"
+             maxlength="16"
+             required>
 
-            <input type="text"
-                  id="card-number"
-                  placeholder="Card Number"
-                  inputmode="numeric"
-                  pattern="\d{16}"
-                  maxlength="16"
-                  required>
+      <div class="payment-row">
+        <input type="month" id="expiry" required>
 
-            <div class="payment-row">
-              <input type="month" id="expiry" required>
+        <input type="password"
+               id="cvv"
+               placeholder="CVV"
+               pattern="\d{3,4}"
+               maxlength="4"
+               required>
+      </div>
 
-              <input type="password"
-                    id="cvv"
-                    placeholder="CVV"
-                    pattern="\d{3,4}"
-                    maxlength="4"
-                    required>
-            </div>
+      <button id="checkout-btn" type="submit" disabled>
+        CHECKOUT
+      </button>
+    </form>
 
-            <button id="checkout-btn" type="submit" disabled>
-                CHECKOUT
-            </button>
-        </form>
+    <!-- ================= GCash PAYMENT ================= -->
+    <div class="gcash-section">
+      <p class="or-divider">— OR —</p>
+
+      <button
+        type="button"
+        id="gcash-pay-btn"
+        class="gcash-btn"
+        disabled
+      >
+        Pay with GCash
+      </button>
     </div>
-  </section>
 
-  <script type="module" src="js/cart.js"></script>
+  </div>
+</section>
+
+<!-- ================= SCRIPT ================= -->
+<script type="module" src="js/cart.js"></script>
+
 </body>
 </html>
-

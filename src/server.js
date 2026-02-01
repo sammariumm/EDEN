@@ -16,6 +16,7 @@ import userRoutes from "./routes/userRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import orderRoutes from "./routes/ordersRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js"
 
 // creates an instance of an Express application
 const app = express();
@@ -52,6 +53,7 @@ app.use('/users', userRoutes);            // authenticates the JWT token; return
 app.use('/requests', requestRoutes);      // for handling requests from requests table (show, accept, reject, etc.)
 app.use('/orders', orderRoutes);          // handles checkout; sends receipt email
 app.use('/', applicationRoutes);          // for job applications (submit, view, etc.)
+app.use('/api/payments', paymentRoutes);       // for payments
 
 // serves default route to serve login page
 app.get("/", (req, res) => {

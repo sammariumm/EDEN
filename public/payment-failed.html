@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Failed</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .failed-card {
+      background: #020617;
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .failed-icon {
+      font-size: 64px;
+      color: #ef4444;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: 28px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #9ca3af;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #ef4444;
+      color: #020617;
+    }
+
+    .btn-primary:hover {
+      background: #dc2626;
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .small {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="failed-card">
+    <div class="failed-icon">✖</div>
+
+    <h1>Payment Failed</h1>
+
+    <p>
+      Your GCash payment was not completed.<br>
+      No charges were made to your account.
+    </p>
+
+    <div class="actions">
+      <a href="cart.html" class="btn btn-primary">
+        Try Again
+      </a>
+
+      <a href="store.html" class="btn btn-secondary">
+        Back to Store
+      </a>
+    </div>
+
+    <div class="small">
+      If this keeps happening, please try another payment method or contact support.
+    </div>
+  </div>
+
+</body>
+</html>
