@@ -548,6 +548,55 @@ router.put(
   }
 );
 
+// ==========================
+// ADMIN: APPROVE REQUEST
+// ==========================
+router.put(
+  "/admin/:id/approve",
+  authenticateToken,
+  requireAdmin,
+  (req, res) => {
+    const { id } = req.params;
+
+    const result = db.prepare(`
+      UPDATE requests
+      SET status = 'approved'
+      WHERE id = ?
+        AND is_deleted = 0
+    `).run(id);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json({ message: "Request approved" });
+  }
+);
+
+// ==========================
+// ADMIN: REJECT REQUEST
+// ==========================
+router.put(
+  "/admin/:id/reject",
+  authenticateToken,
+  requireAdmin,
+  (req, res) => {
+    const { id } = req.params;
+
+    const result = db.prepare(`
+      UPDATE requests
+      SET status = 'rejected'
+      WHERE id = ?
+        AND is_deleted = 0
+    `).run(id);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json({ message: "Request rejected" });
+  }
+);
 
 
 export default router;

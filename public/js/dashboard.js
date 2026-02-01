@@ -707,3 +707,54 @@ adminEditForm.addEventListener("submit", async (e) => {
   closeAdminEdit();
   loadAdminAllRequests();
 });
+
+// ==========================
+// ADMIN APPROVE / REJECT
+// ==========================
+async function approveRequest(requestId) {
+  if (!confirm("Approve this request?")) return;
+
+  try {
+    const res = await fetch(`/requests/admin/${requestId}/approve`, {
+      method: "PUT",
+      headers: API_HEADERS(),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to approve request");
+      return;
+    }
+
+    loadAdminPendingRequests();
+    loadAdminAllRequests();
+  } catch (err) {
+    console.error("Error approving request:", err);
+    alert("Failed to approve request.");
+  }
+}
+
+async function rejectRequest(requestId) {
+  if (!confirm("Reject this request?")) return;
+
+  try {
+    const res = await fetch(`/requests/admin/${requestId}/reject`, {
+      method: "PUT",
+      headers: API_HEADERS(),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to reject request");
+      return;
+    }
+
+    loadAdminPendingRequests();
+    loadAdminAllRequests();
+  } catch (err) {
+    console.error("Error rejecting request:", err);
+    alert("Failed to reject request.");
+  }
+}
