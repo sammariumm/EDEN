@@ -31,12 +31,12 @@
     <!-- JOB REQUEST -->
     <h3>Request Job Listing</h3>
     <form id="jobRequestForm" enctype="multipart/form-data">
-      <input type="hidden" id="jobRequestId" />
+      <input type="hidden" id="jobRequestId" name="id" />   <!-- optional, but good for edit mode -->
 
-      <input type="text" id="jobTitle" placeholder="Title" required />
-      <textarea id="jobDescription" placeholder="Description" required></textarea>
-      <input type="number" id="hourlyRate" placeholder="Hourly Rate" step="0.01" required />
-      <input type="file" id="jobImage" accept="image/*" />
+      <input type="text" id="jobTitle" name="title" placeholder="Title" required />
+      <textarea id="jobDescription" name="description" placeholder="Description" required></textarea>
+      <input type="number" id="hourlyRate" name="hourly_rate" placeholder="Hourly Rate" step="0.01" required />
+      <input type="file" id="jobImage" name="image" accept="image/*" />
 
       <button type="submit" id="jobSubmitBtn">Submit Job Request</button>
       <button type="button" id="jobCancelEditBtn" style="display:none;">Cancel Edit</button>
