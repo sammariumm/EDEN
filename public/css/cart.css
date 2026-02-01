@@ -104,12 +104,39 @@ header
 
 /* Left column: items */
 .cart-left {
-    flex: 2; /* take up 2/3 of space */
-    background: #FEFAE0;          /* or #FEFAE0 to match the creamy subtotal/payment boxes */
-    padding: 20px;              /* matches right side's padding for symmetry */
-    border-radius: 12px;        /* matches right side */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);  /* matches right side */
+    flex: 2;
+    background: #FEFAE0;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    
+    /* Scrolling when content overflows */
+    max-height: 65vh;               /* adjust as needed – e.g. 70vh or 800px */
+    overflow-y: auto;               /* vertical scrollbar appears when needed */
+    scrollbar-gutter: stable both-edges;
+    overflow-x: hidden;
+    scrollbar-width: thin;          /* nicer scrollbar on Firefox */
 }
+
+/* Webkit scrollbar styling (Chrome/Edge/Safari) */
+.cart-left::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cart-left::-webkit-scrollbar-track {
+    background: rgba(80, 91, 57, 0.1); /* subtle green track */
+    border-radius: 10px;
+}
+
+.cart-left::-webkit-scrollbar-thumb {
+    background: #798645;
+    border-radius: 10px;
+}
+
+.cart-left::-webkit-scrollbar-thumb:hover {
+    background: #6a7850;
+}
+
 
 /* Right column: summary & payment */
 .cart-right {
@@ -145,39 +172,159 @@ header
 }
 
 /* CART ROWS */
-.cart-row {
+/* Card for each cart item */
+#cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;                  /* consistent spacing between cards */
+}
+
+.cart-item-card {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 12px;
+    padding: 15px 18px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    transition: 
+        transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),  /* smooth ease for slide-up */
+        opacity 0.5s ease-out,
+        margin-top 0.6s ease-out,                         /* helps when gaps close */
+        box-shadow 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+    margin-top: 0;
+    will-change: transform, opacity, margin-top;
 }
 
-.cart-column {
-    padding: 10px;
+.cart-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.cart-item {
-    width: 45%;
+/* Right part: price + remove – aligned vertically with quantity row */
+.cart-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;              /* right-align text/buttons */
+    justify-content: center;            /* vertically center with quantity */
+    gap: 12px;                          /* space between price and remove */
+    min-width: 140px;                   /* prevents squeezing on small screens */
 }
 
-.cart-price {
-    width: 20%;
-    font-size: 1.1em;
+.cart-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
-.cart-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: red;
-  color: white;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 50%;
+/* Animation class for removing */
+.cart-item-card.removing {
+    transform: translateX(-120px);
+    opacity: 0;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
 }
 
+/* Cards that will slide up get this temporary class */
+.cart-item-card.sliding-up {
+    transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
 
-.cart-header {
+.no-transition {
+    transition: none !important;
+}
+
+/* Image */
+.cart-item-card img {
+    width: 100px;               /* smaller than store tab's 200px – better for cart */
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+/* Details container */
+.cart-item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-item-name {
+    font-size: 1.15em;
     font-weight: bold;
-    border-bottom: 2px solid #333;
+    color: #505B39;
+    margin: 0 0 6px 0;
+}
+
+/* Quantity controls */
+.cart-item-quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    min-height: 36px;
+}
+
+.cart-item-quantity input[type="number"] {
+    width: 60px;
+    padding: 6px;
+    text-align: center;
+    border: 1px solid #798645;
+    border-radius: 6px;
+    margin: 0 10px;
+    font-size: 1em;
+}
+
+.cart-item-quantity button {
+    background: #798645;
+    color: #d9e2a9;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.cart-item-quantity button:hover {
+    background: #6a7850;
+}
+
+/* Price styling */
+.cart-item-price {
+    font-size: 1.25em;
+    font-weight: bold;
+    color: #505B39;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.remove-btn {
+    background: #EB5757;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95em;
+    transition: background 0.2s, transform 0.15s;
+    min-width: 90px;                    /* consistent width */
+    text-align: center;
+}
+
+.remove-btn:hover {
+    background: #CC4C4C;
+    transform: scale(1.04);
 }
 
 /* EDEN ITEM ROW STYLE */
@@ -285,7 +432,7 @@ header
 }
 
 .video-bg {
-position: absolute;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
