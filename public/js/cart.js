@@ -9,6 +9,7 @@ const emptyCartMsg = document.getElementById("empty-cart-message"); // Fixed ID 
 const checkoutBtn = document.getElementById("checkout-btn");
 const subtotalEl = document.getElementById("subtotal");
 const totalEl = document.getElementById("total");
+const paymentForm = document.getElementById("payment-form");
 
 let cart = [];
 
@@ -165,3 +166,75 @@ function updateTotals() {
   document.getElementById("tax").textContent = `₱${tax.toFixed(2)}`;
   totalEl.textContent = `₱${total.toFixed(2)}`;
 }
+
+paymentForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (cart.length === 0) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  const email = document.getElementById("email").value.trim();
+  const cardNumber = document.getElementById("card-number").value.trim();
+  const expiry = document.getElementById("expiry").value;
+  const cvv = document.getElementById("cvv").value.trim();
+
+  // Client-side validation (format only)
+  if (!/^\d{16}$/.test(cardNumber)) {
+    alert("Invalid card number.");
+    return;
+  }
+
+  if (!/^\d{3,4}$/.test(cvv)) {
+    alert("Invalid CVV.");
+    return;
+  }
+
+  const [year, month] = expiry.split("-");
+  const expiryDate = new Date(year, month);
+  if (expiryDate < new Date()) {
+    alert("Card has expired.");
+    return;
+  }
+
+  // Prepare payload (DO NOT SEND CARD DATA)
+  const subtotal = cart.reduce(
+    (sum, item) => sum + (item.price * item.quantity) / 10,
+    0
+  );
+  const tax = subtotal * 0.12;
+  const total = subtotal + tax;
+
+  try {
+    const res = await fetch("/orders/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        cart,
+        totals: { subtotal, tax, total }
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Checkout failed.");
+      return;
+    }
+
+    alert("Order placed successfully! Receipt sent to your email.");
+
+    localStorage.removeItem("eden_cart");
+    renderCart();
+    updateCartCount();
+    paymentForm.reset();
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error during checkout.");
+  }
+});
