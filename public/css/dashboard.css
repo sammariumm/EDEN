@@ -383,6 +383,11 @@ min-height: 100%;
   margin-bottom: 20px;
 }
 
+#user_request_table,
+#user_job_request_table {
+  border-collapse: separate;
+}
+
 #user_request_table th, 
 #user_request_table td,
 #user_job_request_table th, 
@@ -390,11 +395,36 @@ min-height: 100%;
   width: 220px;
   text-align: center;
   vertical-align: middle;
+  border: 1px solid #4f5a22;
+  padding: 8px;
+}
+
+#user_request_table th, 
+#user_job_request_table th {
+  background-color: #4f5a22;
+  color: #FEFAE0;
+  border-radius: 5px;
+}
+
+#user_request_table td, 
+#user_job_request_table td {
+  border-radius: 5px;
 }
 
 #user_request_table tr,
 #user_job_request_table tr {
   height: 50px;
+}
+
+#user_request_table tr:nth-child(even),
+#user_job_request_table tr:nth-child(even) {
+  background-color: #fef8ce;
+}
+
+#user_request_table tr:hover,
+#user_job_request_table tr:hover {
+  opacity: 0.8;
+  box-shadow: 0px 5px 10px rgba(65, 62, 62, 0.8);
 }
 
 #user_request_table img,
@@ -415,8 +445,6 @@ min-height: 100%;
 .delete-application {
     padding-top: 10px;
     padding-bottom: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
     border-radius: 20px;
     border: none;
     background-color: #798645;
@@ -425,7 +453,7 @@ min-height: 100%;
     font-size: 12px;
     transition: box-shadow 0.2s; 
     cursor: pointer;
-    width: 68px;
+    width: 60px;
 }
 
 .edit-request:hover,
@@ -510,6 +538,12 @@ min-height: 100%;
   margin-bottom: 20px;
 }
 
+#pending_request_table,
+#admin_application_table, 
+#admin_allpost_table {
+  border-collapse: separate;
+}
+
 #pending_request_table th,
 #pending_request_table td,
 #admin_application_table th,
@@ -519,12 +553,42 @@ min-height: 100%;
   width: 220px;
   text-align: center;
   vertical-align: middle;
+  border: 1px solid #4f5a22;
+  padding: 8px;
+}
+
+#pending_request_table th,
+#admin_application_table th,
+#admin_allpost_table th {
+  background-color: #4f5a22;
+  color: #FEFAE0;
+  border-radius: 5px;
+}
+
+#pending_request_table td,
+#admin_application_table td,
+#admin_allpost_table td {
+  border-radius: 5px;
 }
 
 #pending_request_table tr,
 #admin_application_table tr, 
 #admin_allpost_table tr {
   height: 50px;
+}
+
+#pending_request_table tr:nth-child(even),
+#admin_application_table tr:nth-child(even), 
+#admin_allpost_table tr:nth-child(even) {
+  background-color: #fef8ce;
+  height: 50px;
+}
+
+#pending_request_table tr:hover,
+#admin_application_table tr:hover, 
+#admin_allpost_table tr:hover {
+  opacity: 0.8;
+  box-shadow: 0px 5px 10px rgba(65, 62, 62, 0.8);
 }
 
 #user_request_table img,
