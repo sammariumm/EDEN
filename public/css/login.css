@@ -30,6 +30,8 @@ body {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   backdrop-filter: blur(4px);
+  -webkit-animation: appear 1.0s ;
+  animation: appear 1.0s ;
 }
 
 .container h1 {
@@ -264,4 +266,10 @@ form {
   .toggle-panel h1 {
     font-size: 30px;
   }
+}
+
+@keyframes appear {
+0% {opacity:0;}
+50% {opacity:0;}
+100% {opacity:1;}
 }
