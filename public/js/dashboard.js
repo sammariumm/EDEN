@@ -597,8 +597,8 @@ async function loadAdminPendingRequests() {
           ${imageHtml}
         </td>
         <td>
-          <button onclick="approveRequest(${r.id})">Approve</button>
-          <button onclick="rejectRequest(${r.id})">Reject</button>
+          <button class="accept-request" onclick="approveRequest(${r.id})">Approve</button>
+          <button class="reject-request" onclick="rejectRequest(${r.id})">Reject</button>
           <button class="delete-request" data-id="${r.id}">Delete</button>
         </td>
       `;
@@ -635,7 +635,7 @@ async function loadAdminAllRequests() {
       const actionHtml =
         p.status === "deleted"
           ? "—"
-          : `<button onclick='openAdminEdit(${JSON.stringify(p)})'>Edit</button> 
+          : `<button class="editing-request" onclick='openAdminEdit(${JSON.stringify(p)})'>Edit</button> 
               <button class="delete-request" data-id="${p.id}">Delete</button>`;
 
       tbody.innerHTML += `
@@ -751,15 +751,25 @@ function openAdminEdit(post) {
   adminEditHourlyRate.style.display = "none";
   adminEditPrice.style.display = "none";
   adminEditSubcategory.style.display = "none";
+  adminEditImage.style.display = "none"
 
   if (post.type === "job_listing") {
     adminEditHourlyRate.style.display = "block";
     adminEditHourlyRate.value = post.hourly_rate;
+    adminEditImage.style.display = "none"
+  } 
+  else if (post.type === "service_avail") {
+    adminEditHourlyRate.style.display = "none";
+    adminEditPrice.style.display = "none";
+    adminEditSubcategory.style.display = "none";
+    adminEditImage.style.display = "none"
   } else {
     adminEditPrice.style.display = "block";
     adminEditSubcategory.style.display = "block";
+    adminEditImage.style.display = "block";
     adminEditPrice.value = post.price;
     adminEditSubcategory.value = post.subcategory;
+    adminEditImage.value = post.image;
   }
 }
 

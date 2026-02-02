@@ -8,47 +8,47 @@
 <body>
 
   <!-- NAV -->
-  <nav>
-    <div class="navigation">
-      <a href="index.html">Home</a>
-      <a href="eventservices.html">Event Services</a>
-      <a href="job_listings.html">Job Listings</a>
-      <a href="store.html">Store</a>
-      <a href="about.html">About</a>
-      <a href="login.html">Login</a>
-    </div>
-  </nav>
+  <header>
+    <nav class="navigation_bar">
+      <div class="navigation">
+        <a href="index.html"> Home </a>
+        <a href="eventservices.html"> Event Services </a>
+        <a href="job_listings.html"> Job Listings </a>
+        <a href="store.html"> Store </a>
+        <a href="about.html"> About </a>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </nav>
+  </header>
 
-  <h1 id="welcome"></h1>
-  <button id="logoutBtn">Logout</button>
+  <section class="promo">
+    <h2 id="text" class="text"> Dashboard </h2>
+    <h3 id="tagline" class="tagline"> welcome to eden. all in one place. </h3>
+    <video class="video-bg" autoplay muted loop>
+      <source src="uploads/aboutus_promo.mp4" type="video/mp4" />
+    </video>
+  </section>
+
+  <section class="filler1">
+  </section>
+
+  <section class="dashboard_welcome">
+    <h1 id="welcome"></h1>
+  </section>
 
   <!-- ==========================
        USER DASHBOARD
   ========================== -->
   <section id="userDashboard" style="display:none;">
-    <h2>User Dashboard</h2>
 
-    <!-- JOB REQUEST -->
-    <h3>Request Job Listing</h3>
-    <form id="jobRequestForm" enctype="multipart/form-data">
-      <input type="hidden" id="jobRequestId" name="id" />   <!-- optional, but good for edit mode -->
-
-      <input type="text" id="jobTitle" name="title" placeholder="Title" required />
-      <textarea id="jobDescription" name="description" placeholder="Description" required></textarea>
-      <input type="number" id="hourlyRate" name="hourly_rate" placeholder="Hourly Rate" step="0.01" required />
-      <input type="file" id="jobImage" name="image" accept="image/*" />
-
-      <button type="submit" id="jobSubmitBtn">Submit Job Request</button>
-      <button type="button" id="jobCancelEditBtn" style="display:none;">Cancel Edit</button>
-    </form>
-
-    <!-- STORE REQUEST -->
+    <section id="requests_section">
+        <!-- STORE REQUEST -->
     <h3>Request Store Posting</h3>
     <form id="storeRequestForm" enctype="multipart/form-data">
       <input type="hidden" id="storeRequestId" />
 
       <input type="text" id="storeTitle" placeholder="Title" required />
-      <textarea id="storeDescription" placeholder="Description" required></textarea>
+      <input id="storeDescription" placeholder="Description" required />
       <input type="number" id="price" placeholder="Price" step="0.01" required />
 
       <select id="storeSubcategory" required>
@@ -65,10 +65,26 @@
       <button type="submit" id="storeSubmitBtn">Submit Store Request</button>
       <button type="button" id="storeCancelEditBtn" style="display:none;">Cancel Edit</button>
     </form>
+    
+    <!-- JOB REQUEST -->
+    <h3>Request Job Listing</h3>
+    <form id="jobRequestForm" enctype="multipart/form-data">
+      <input type="hidden" id="jobRequestId" name="id" />   <!-- optional, but good for edit mode -->
 
+      <input type="text" id="jobTitle" name="title" placeholder="Title" required />
+      <input id="jobDescription" name="description" placeholder="Description" required />
+      <input type="number" id="hourlyRate" name="hourly_rate" placeholder="Hourly Rate" step="0.01" required />
+      <input type="file" id="jobImage" name="image" accept="image/*" />
+
+      <button type="submit" id="jobSubmitBtn">Submit Job Request</button>
+      <button type="button" id="jobCancelEditBtn" style="display:none;">Cancel Edit</button>
+    </form>
+    </section>
+
+    <section id="user_requests_section">
     <!-- USER REQUESTS -->
     <h3>Your Requests</h3>
-    <table>
+    <table id="user_request_table">
       <thead>
         <tr>
           <th>Type</th>
@@ -81,10 +97,12 @@
       </thead>
       <tbody id="userRequests"></tbody>
     </table>
+    </section>
 
     <!-- USER APPLICATIONS -->
+    <section id="user_job_requests_section">
     <h3>Applications to Your Job Listings</h3>
-    <table>
+    <table id="user_job_request_table">
       <thead>
         <tr>
           <th>Job Title</th>
@@ -98,17 +116,18 @@
       <tbody id="userApplications"></tbody>
       <!-- Note: The "Accept" button will be added here dynamically via dashboard.js in the Action column -->
     </table>
+    </section>
   </section>
 
   <!-- ==========================
        ADMIN DASHBOARD
   ========================== -->
   <section id="adminDashboard" style="display:none;">
-    <h2>Admin Dashboard</h2>
 
     <!-- PENDING REQUESTS -->
+    <section id="admin_pending_requests_section">
     <h3>Pending Requests</h3>
-    <table>
+    <table id = "pending_request_table">
       <thead>
         <tr>
           <th>User</th>
@@ -119,10 +138,12 @@
       </thead>
       <tbody id="adminRequests"></tbody>
     </table>
+    </section>
 
     <!-- ADMIN APPLICATIONS -->
+     <section id="admin_applications_section">
     <h3>Applications to Your Job Listings</h3>
-    <table>
+    <table id = "admin_application_table">
       <thead>
         <tr>
           <th>Job Title</th>
@@ -136,10 +157,12 @@
       <tbody id="adminApplications"></tbody>
       <!-- Note: The "Accept" button will be added here dynamically via dashboard.js in the Action column -->
     </table>
+    </section>
 
     <!-- ALL POSTS -->
+    <section id="admin_allposts_section">
     <h3>All Posts</h3>
-    <table>
+    <table id = "admin_allpost_table">
       <thead>
         <tr>
           <th>User</th>
@@ -151,6 +174,7 @@
       </thead>
       <tbody id="adminAllPosts"></tbody>
     </table>
+    </section>
   </section>
 
   <!-- ADMIN EDIT MODAL -->
@@ -164,7 +188,7 @@
       <input type="hidden" id="adminEditId" />
 
       <input type="text" id="adminEditTitle" placeholder="Title" required />
-      <textarea id="adminEditDescription" placeholder="Description" required></textarea>
+      <input id="adminEditDescription" placeholder="Description" required />
 
       <!-- Job listing -->
       <input
@@ -196,8 +220,8 @@
       <input type="file" id="adminEditImage" accept="image/*" />
 
       <div class="modal-actions">
-        <button type="submit">Save Changes</button>
-        <button type="button" onclick="closeAdminEdit()">Cancel</button>
+        <button id="edit_save" type="submit">Save Changes</button>
+        <button id="edit_cancel" type="button" onclick="closeAdminEdit()">Cancel</button>
       </div>
     </form>
   </div>
@@ -205,6 +229,48 @@
 
   <!-- SCRIPT -->
   <script src="js/dashboard.js" defer></script>
+
+<section class="filler2">
+  </section>
+
+ <section id="footer">
+            <div class="main-footer" id = "blur2">
+              <div class="logoinfo" data-aos="fade-up">
+                <h2>Welcome to Eden!</h2>
+                <p>Cultivating Paradise, One Garden at a Time</p>
+          
+                <div class="contact-details">
+                  <h1>Contact Us</h1>
+                  <li>
+                    <div class="fa fa-phone"></div><a href="tel:+630987654321">+63 0987654321</a></li>
+                  <li>
+                    <div class="fa fa-envelope"></div><a href="mailto:muesli.eden@gmail.com">muesli.eden@gmail.com</a></li>
+                  </li>
+              </div>
+            </div>
+            <div class="com " data-aos="fade-up">
+              <h1>Eden</h1>
+              <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="eventservices.html">Event Services</a></li>
+                <li><a href="job_listings.html">Job Listings</a></li>
+                <li><a href="store.html">Store</a></li>
+                <li><a href="about.html">About</a></li>
+              </ul>
+            </div>
+            <div class="info" data-aos="fade-up">
+              <h1>Social Media</h1>
+              <div class="sociallogos">
+                <div class="logobox">
+                  <a href="https://www.tiktok.com/@edengarden2025?_t=ZS-8v557sJxLam&_r=1" target="_blank" rel="noopener noreferrer"><img src="uploads/tiktok.png" style="width:40px;height:40px;"></a>
+                  <a href="https://www.instagram.com/edenparadisegarden?igsh=d3dxeDFyMjZ6MGIx&utm_source=qr" target="_blank" rel="noopener noreferrer"><img src="uploads/instagram.png" style="width:40px;height:40px;"></a>
+                  <a href="https://www.facebook.com/share/1BvDCAfEMm/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"><img src="uploads/facebook.png"style="width:40px;height:40px;"></a>
+                </div>
+              </div>
+            </div>
+            </div>
+          <footer>Copyright © 2025 Eden. All Rights Reserved.</footer>
+          </section>
 
 </body>
 </html>
